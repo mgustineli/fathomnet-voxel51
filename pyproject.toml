@@ -1,5 +1,5 @@
 [project]
-name = "fathomnet-voxel51"
+name = "fathomnet_voxel51"
 version = "0.0.1"
 authors = [{ name = "Murilo Gustineli", email = "murilogustineli@gmail.com" }]
 description = "FathomNet-Voxel51 helper package"
@@ -32,5 +32,5 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["fathomnet-voxel51"]
+include = ["fathomnet_voxel51"]
 namespaces = false
