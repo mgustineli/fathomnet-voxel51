@@ -64,16 +64,19 @@ uv pip install -e .
 
 ### 3. Credentials
 
-You will need the following credentials set in your environment:
+You will need the following credentials set in your environment. The project uses `python-dotenv` to load these from a `.env` file in the project root.
 
-- **FiftyOne Enterprise:** API Key and URI.
-- **Google Cloud Platform:** Credentials to write to the storage bucket.
+1.  Create a file named `.env` in the root directory: `touch .env`
+2.  Add the following variables to it:
 
-```bash
-export FIFTYONE_API_URI="https://<your-deployment>.fiftyone.ai"
-export FIFTYONE_API_KEY="<your-api-key>"
-export GOOGLE_APPLICATION_CREDENTIALS="/path/to/your/gcp_credentials.json"
+```env
+FIFTYONE_API_URI="https://<your-deployment>.fiftyone.ai"
+FIFTYONE_API_KEY="<your-api-key>"
+GOOGLE_APPLICATION_CREDENTIALS="/path/to/your/gcp_credentials.json"
+GOOGLE_CLOUD_PROJECT="<your-gcp-project-id>"
 ```
+
+> **Note:** The `GOOGLE_CLOUD_PROJECT` is required for the notebook environment to correctly identify your GCP project.
 
 To verify your GCP authentication setup, run:
 
