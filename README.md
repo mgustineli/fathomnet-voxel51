@@ -21,6 +21,7 @@ This repo contains the workflow and analysis for the [FathomNet 2025 dataset](ht
 │   ├── 00_fathomnet-eda.ipynb  # Initial EDA and data exploration
 │   └── 01_load_data_gcp.ipynb  # Example notebook for loading data from GCP
 ├── pyproject.toml              # Project dependencies and configuration
+├── GCLOUD.md                   # GCP/gsutil commands reference
 └── README.md
 ```
 
