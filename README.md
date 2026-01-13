@@ -18,8 +18,8 @@ This repo contains the workflow and analysis for the [FathomNet 2025 dataset](ht
 │   ├── ingest_dataset.py       # Script to ingest data into FiftyOne
 │   └── load_data_gcp.py        # Script to load data from GCP
 ├── notebooks/
-│   ├── 00_load_data_gcp.ipynb  # Example notebook for loading data from GCP
-│   └── fathomnet-2025-cvpr-fgvc.ipynb  # Initial EDA and data exploration
+│   ├── 00_fathomnet-2025-cvpr-fgvc.ipynb  # Initial EDA and data exploration
+│   └── 01_load_data_gcp.ipynb  # Example notebook for loading data from GCP
 ├── pyproject.toml              # Project dependencies and configuration
 └── README.md
 ```
