@@ -114,6 +114,10 @@ python -m fathomnet_voxel51.download_data
 
 To explore the data locally or perform EDA before ingestion, check the notebook `notebooks/fathomnet-2025-cvpr-fgvc.ipynb`.
 
+## GCP Commands Reference
+
+For common `gsutil` commands (listing, copying, deleting data in GCS), see [GCLOUD.md](GCLOUD.md).
+
 ## Dataset Info
 
 Source: [FathomNet 2025 - CVPR FGVC Competition](https://www.kaggle.com/competitions/fathomnet-2025/data)
