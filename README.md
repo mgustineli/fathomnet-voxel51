@@ -21,6 +21,7 @@ This repo contains the workflow and analysis for the [FathomNet 2025 dataset](ht
 │   ├── 01_upload_to_gcp.ipynb  # Example notebook for uploading data to GCS
 │   └── 02_ingest_dataset.ipynb # Example notebook for FiftyOne ingestion
 ├── pyproject.toml              # Project dependencies and configuration
+├── CLAUDE.md                   # Claude Code guidance for this repository
 ├── GCLOUD.md                   # GCP/gsutil commands reference
 └── README.md
 ```
