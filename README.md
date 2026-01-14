@@ -19,7 +19,7 @@ This repo contains the workflow and analysis for the [FathomNet 2025 dataset](ht
 │   └── ingest_dataset.py       # Script to ingest data into FiftyOne
 ├── notebooks/
 │   ├── 00_fathomnet-eda.ipynb  # Initial EDA and data exploration
-│   └── 01_load_data_gcp.ipynb  # Example notebook for loading data from GCP
+│   └── 01_upload_to_gcp.ipynb  # Example notebook for uploading data to GCS
 ├── pyproject.toml              # Project dependencies and configuration
 ├── GCLOUD.md                   # GCP/gsutil commands reference
 └── README.md
