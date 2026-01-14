@@ -15,7 +15,7 @@ This repo contains the workflow and analysis for the [FathomNet 2025 dataset](ht
 │   ├── __init__.py
 │   ├── check_gcp_auth.py       # Script to verify GCP authentication
 │   ├── download_data.py        # Script to fetch images and upload to Cloud Storage
-│   ├── download_data_gcp.py    # Script to download images and upload to GCP
+│   ├── upload_to_gcs.py        # Script to stream images from URLs to GCS
 │   └── ingest_dataset.py       # Script to ingest data into FiftyOne
 ├── notebooks/
 │   ├── 00_fathomnet-eda.ipynb  # Initial EDA and data exploration
@@ -108,8 +108,10 @@ The dataset relies on images hosted via URLs. We use a staging approach:
 Run the ingestion script:
 
 ```bash
-python -m fathomnet_voxel51.download_data
+python -m fathomnet_voxel51.upload_to_gcs
 ```
+
+> _Expected runtime: ~1 hour (train: ~63 min, test: ~3 min) at ~2 images/sec._
 
 ### Exploration
 

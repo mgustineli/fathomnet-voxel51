@@ -1,5 +1,5 @@
 """
-Load FathomNet images to a GCP bucket.
+Upload FathomNet images to Google Cloud Storage.
 
 This script streams images from their COCO URLs directly to Google Cloud Storage,
 avoiding local disk I/O. It processes both train and test splits asynchronously.
@@ -16,16 +16,16 @@ PREREQUISITES:
 
 USAGE:
     # Run on the full dataset (all images):
-        $ python -m fathomnet_voxel51.load_data_gcp
+        $ python -m fathomnet_voxel51.upload_to_gcs
 
     # Run on a subset of 100 images (for testing):
-        $ python -m fathomnet_voxel51.load_data_gcp --limit 100
+        $ python -m fathomnet_voxel51.upload_to_gcs --limit 100
 
     # Run with custom JSON paths:
-        $ python -m fathomnet_voxel51.load_data_gcp --train_json path/to/train.json --test_json path/to/test.json
+        $ python -m fathomnet_voxel51.upload_to_gcs --train_json path/to/train.json --test_json path/to/test.json
 
     # Run only on train split with 100 images:
-        $ python -m fathomnet_voxel51.load_data_gcp --train_json data/dataset_train.json --test_json "" --limit 100
+        $ python -m fathomnet_voxel51.upload_to_gcs --train_json data/dataset_train.json --test_json "" --limit 100
 
 ARGUMENTS:
     --train_json : Path to training dataset JSON (default: data/dataset_train.json)
