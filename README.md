@@ -126,3 +126,6 @@ Source: [FathomNet 2025 - CVPR FGVC Competition](https://www.kaggle.com/competit
 - Type: Object Detection
 - Classes: 79 (Marine species + supercategories)
 - Format: COCO JSON
+- Train images: 8,981
+- Test images: 325
+- Size: 24.15 GiB
