@@ -88,7 +88,7 @@ GOOGLE_CLOUD_PROJECT="<your-gcp-project-id>"
 - **Application Default Credentials (ADC)** _(recommended for local development)_: Run `gcloud auth application-default login`. No `GOOGLE_APPLICATION_CREDENTIALS` needed.
 - **Service Account Key**: Set `GOOGLE_APPLICATION_CREDENTIALS` to the path of your service account JSON key file. Useful for CI/CD or production environments.
 
-> **Note:** The `GOOGLE_CLOUD_PROJECT` is always required for the notebook environment to correctly identify your GCP project.
+> _Note: The `GOOGLE_CLOUD_PROJECT` is always required for the notebook environment to correctly identify your GCP project._
 
 To verify your GCP authentication setup, run:
 
