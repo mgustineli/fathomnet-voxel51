@@ -51,5 +51,14 @@ Data flow:
 ```bash
 FIFTYONE_API_URI="https://<deployment>.fiftyone.ai"
 FIFTYONE_API_KEY="<api-key>"
-GOOGLE_CLOUD_PROJECT="<gcp-project-id>"
 ```
+
+## GCP Authentication
+
+The code uses `google.cloud.storage.Client()` which automatically detects the GCP project from:
+
+- Active gcloud configuration (after `gcloud auth application-default login`)
+- Application Default Credentials (ADC)
+- Service account credentials (if `GOOGLE_APPLICATION_CREDENTIALS` is set)
+
+**Note:** `GOOGLE_CLOUD_PROJECT` environment variable is NOT used by the code. The project ID is automatically detected from gcloud authentication.

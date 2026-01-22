@@ -76,19 +76,16 @@ You will need the following credentials set in your environment. The project use
 FIFTYONE_API_URI="https://<your-deployment>.fiftyone.ai"
 FIFTYONE_API_KEY="<your-api-key>"
 
-# GCP (required)
-GOOGLE_CLOUD_PROJECT="<your-gcp-project-id>"
-
 # GCP Service Account (optional - only if not using ADC)
 # GOOGLE_APPLICATION_CREDENTIALS="/path/to/your/gcp_credentials.json"
 ```
 
 #### GCP Authentication Options
 
-- **Application Default Credentials (ADC)** _(recommended for local development)_: Run `gcloud auth application-default login`. No `GOOGLE_APPLICATION_CREDENTIALS` needed.
+- **Application Default Credentials (ADC)** _(recommended for local development)_: Run `gcloud auth application-default login`. The GCP project is automatically detected from your active gcloud configuration.
 - **Service Account Key**: Set `GOOGLE_APPLICATION_CREDENTIALS` to the path of your service account JSON key file. Useful for CI/CD or production environments.
 
-> _Note: The `GOOGLE_CLOUD_PROJECT` is always required for the notebook environment to correctly identify your GCP project._
+> _Note: The code automatically detects your GCP project from gcloud authentication - no need to set `GOOGLE_CLOUD_PROJECT` environment variable._
 
 To verify your GCP authentication setup, run:
 
