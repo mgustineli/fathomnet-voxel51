@@ -5,14 +5,19 @@ Common `gcloud` and `gsutil` commands for managing data in Google Cloud Storage.
 ## List Buckets and Objects
 
 ```bash
-# List all buckets in your project
-gsutil ls
-
 # List objects in a bucket
+# Note: You need access to the specific bucket, not project-level permissions
+gsutil ls gs://<your-bucket>/
+
+# List objects in a specific folder
 gsutil ls gs://<your-bucket>/<your-dataset>/
 
 # List with details (size, date)
 gsutil ls -lh gs://<your-bucket>/<your-dataset>/
+
+# List all buckets in your project (requires storage.buckets.list permission)
+# If you get AccessDeniedException, you can still work with specific buckets by name
+gsutil ls
 ```
 
 ## View Storage Info
