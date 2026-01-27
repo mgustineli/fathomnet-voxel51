@@ -25,7 +25,7 @@ USAGE:
     $ python -m fathomnet_voxel51.ingest_dataset --recreate --limit 10
 
     # Create a test dataset with custom name and 100 samples per split:
-    $ python -m fathomnet_voxel51.ingest_dataset --name fathomnet-test --limit 100
+    $ python -m fathomnet_voxel51.ingest_dataset --dataset_name fathomnet-test --limit 100
 """
 
 import argparse
@@ -201,7 +201,7 @@ def ingest(dataset_name: str, recreate: bool = False, limit: int | None = None):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--name",
+        "--dataset_name",
         type=str,
         default=DATASET_NAME,
         help=f"Dataset name (default: {DATASET_NAME})",
@@ -219,7 +219,7 @@ def main():
     )
     args = parser.parse_args()
 
-    ingest(dataset_name=args.name, recreate=args.recreate, limit=args.limit)
+    ingest(dataset_name=args.dataset_name, recreate=args.recreate, limit=args.limit)
 
 
 if __name__ == "__main__":
