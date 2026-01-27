@@ -6,13 +6,30 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a FiftyOne Enterprise project for analyzing the FathomNet 2025 dataset (CVPR-FGVC marine species competition). The workflow involves streaming images from FathomNet URLs to GCS, then ingesting them into FiftyOne Enterprise for analysis.
 
+## FiftyOne Enterprise PyPI Setup (One-time)
+
+This project uses FiftyOne Enterprise (v2.14.1) which requires authentication to download from the private PyPI repository.
+
+**Option 1: Add to shell profile (recommended - permanent setup):**
+
+```bash
+echo 'export UV_EXTRA_INDEX_URL="https://8c7d1077ed792efe@pypi.fiftyone.ai"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+**Option 2: Use project's .env file (already configured):**
+
+```bash
+export $(grep UV_EXTRA_INDEX_URL .env | xargs)
+```
+
 ## Build and Development Commands
 
 ```bash
 # Create virtual environment and install dependencies
 uv venv .venv
 source .venv/bin/activate
-UV_EXTRA_INDEX_URL="https://<token>@pypi.fiftyone.ai" uv pip install -e .
+uv pip install -e .  # Works if Option 1 setup is done, otherwise prefix with: UV_EXTRA_INDEX_URL="..." uv pip install -e .
 
 # Upload images to GCS
 python -m fathomnet_voxel51.upload_to_gcs [--limit N]

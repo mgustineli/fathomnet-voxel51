@@ -1,5 +1,9 @@
 from google.cloud import storage
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 def check_gcp_auth():
@@ -7,9 +11,12 @@ def check_gcp_auth():
         f"Checking auth for credentials: {os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', 'Using Default/User Auth')}"
     )
 
+    project_id = os.getenv("GOOGLE_CLOUD_PROJECT")
+    print(f"Using project ID: {project_id}")
+
     try:
         # distinct from just logging in, this checks if the library can actually authorize
-        client = storage.Client()
+        client = storage.Client(project=project_id)
         print(f"✅ SUCCESS! Authenticated with Project ID: {client.project}")
 
         # Optional: Verify you can actually read from your specific bucket

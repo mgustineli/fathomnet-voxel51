@@ -93,9 +93,29 @@ Analysis & Curation
 
 ## Setup & Installation
 
-### 1. Environment
+### 1. FiftyOne Enterprise PyPI Access (One-time Setup)
 
-Ensure you have Python 3.9+ installed. It is recommended to use a virtual environment.
+This project uses **FiftyOne Enterprise v2.14.1**, which requires authentication to download from the private PyPI repository.
+
+**Add PyPI credentials to your shell profile (one-time setup):**
+
+```bash
+# Add to ~/.zshrc (or ~/.bashrc if using bash)
+echo 'export UV_EXTRA_INDEX_URL="https://8c7d1077ed792efe@pypi.fiftyone.ai"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+This one-time setup allows `uv pip install` to automatically authenticate with the FiftyOne PyPI repository.
+
+**Alternative:** If you prefer not to modify your shell profile, the PyPI URL is also stored in `.env` and can be loaded per-session:
+
+```bash
+export $(grep UV_EXTRA_INDEX_URL .env | xargs)
+```
+
+### 2. Environment
+
+Ensure you have Python 3.10+ installed. It is recommended to use a virtual environment.
 
 ```bash
 # Create and activate virtual env
@@ -103,7 +123,7 @@ uv venv .venv
 source .venv/bin/activate
 ```
 
-### 2. Dependencies
+### 3. Dependencies
 
 Install dependencies using `uv`:
 
@@ -111,9 +131,9 @@ Install dependencies using `uv`:
 uv pip install -e .
 ```
 
-> _Note: This project requires fiftyone, google-cloud-storage, and standard data science libraries._
+> _Note: This project requires FiftyOne Enterprise, google-cloud-storage, and standard data science libraries._
 
-### 3. Credentials
+### 4. Credentials
 
 You will need the following credentials set in your environment. The project uses `python-dotenv` to load these from a `.env` file in the project root.
 

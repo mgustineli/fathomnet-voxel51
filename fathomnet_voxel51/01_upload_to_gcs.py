@@ -37,9 +37,14 @@ import json
 import asyncio
 import aiohttp
 import argparse
+import os
+from dotenv import load_dotenv
 from gcloud.aio.storage import Storage
 from google.cloud import storage as sync_storage
 from tqdm.asyncio import tqdm_asyncio
+
+# Load environment variables
+load_dotenv()
 
 # CONFIGURATION
 BUCKET_NAME = "voxel51-test"
@@ -73,7 +78,8 @@ async def upload_stream(session, gcs_client, url, blob_name, existing_blobs, sem
 def fetch_existing_blobs(prefix):
     """Pre-fetch all existing blob names under a prefix (synchronous, runs once)."""
     print(f"Checking existing files in gs://{BUCKET_NAME}/{prefix}...")
-    client = sync_storage.Client()
+    project_id = os.getenv("GOOGLE_CLOUD_PROJECT")
+    client = sync_storage.Client(project=project_id)
     bucket = client.bucket(BUCKET_NAME)
     blobs = bucket.list_blobs(prefix=prefix)
     existing = {blob.name for blob in blobs}
