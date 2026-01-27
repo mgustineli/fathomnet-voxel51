@@ -27,7 +27,6 @@ This repo contains the workflow and analysis for the [FathomNet 2025 dataset](ht
 │   ├── tasks.md                     # Project task tracking
 │   ├── meeting_notes/               # MBARI sync meeting transcripts
 │   └── ...                          # Other documentation files
-├── update_claude_mcp_config.py      # MCP configuration updater
 ├── pyproject.toml                   # Project dependencies and configuration
 ├── .pre-commit-config.yaml          # Pre-commit hooks (Ruff, Prettier)
 ├── CLAUDE.md                        # Claude Code guidance for this repository

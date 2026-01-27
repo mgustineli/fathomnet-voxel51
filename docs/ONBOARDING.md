@@ -6,7 +6,7 @@
 
 ## Project Summary
 
-This repository demonstrates FiftyOne Enterprise capabilities for analyzing the FathomNet 2025 dataset (CVPR-FGVC marine species competition). The project simulates a real-world Customer Success scenario with MBARI (Monterey Bay Aquarium Research Institute), a marine research organization tackling hierarchical classification, data curation, and anomaly detection in underwater imagery.
+This repository demonstrates FiftyOne Enterprise capabilities for analyzing the [**FathomNet 2025 dataset**](https://www.kaggle.com/competitions/fathomnet-2025) (CVPR-FGVC marine species competition). The project simulates a real-world Customer Success scenario with MBARI (Monterey Bay Aquarium Research Institute), a marine research organization tackling hierarchical classification, data curation, and anomaly detection in underwater imagery.
 
 **Key Statistics:**
 
