@@ -1,7 +1,7 @@
 # Tasks: FathomNet 2025 @ FiftyOne Enterprise
 
-**Status**: Repository setup complete, ready for data ingestion
-**Current Phase**: Data ingestion and exploration
+**Status**: Data ingestion complete, ready for embeddings and exploration
+**Current Phase**: Phase 2 - Data Exploration
 **Last Updated**: 2026-01-27
 
 ---
@@ -54,43 +54,43 @@ This project demonstrates FiftyOne Enterprise capabilities for analyzing the Fat
 
 ---
 
-## Phase 1: Data Ingestion
+## Phase 1: Data Ingestion ✅ COMPLETED
 
 **Goal**: Upload images to GCS and ingest dataset into FiftyOne Enterprise.
 
 ### 1.1 Verify GCP Authentication
 
-- [ ] Run: `python -m fathomnet_voxel51.check_gcp_auth`
-- [ ] Confirm authenticated project ID displayed
-- [ ] Verify access to `voxel51-test` bucket
+- [x] Run: `python -m fathomnet_voxel51.check_gcp_auth`
+- [x] Confirm authenticated project ID displayed
+- [x] Verify access to `voxel51-test` bucket
 
 ### 1.2 Upload Images to GCS
 
-- [ ] Test with small subset first:
-  - [ ] Run: `python -m fathomnet_voxel51.upload_to_gcs --limit 100`
-  - [ ] Verify images uploaded to `gs://voxel51-test/fathomnet/{train,test}_images/`
+- [x] Test with small subset first:
+  - [x] Run: `python -m fathomnet_voxel51.upload_to_gcs --limit 100`
+  - [x] Verify images uploaded to `gs://voxel51-test/fathomnet/{train,test}_images/`
 
-- [ ] Upload full dataset:
-  - [ ] Run: `python -m fathomnet_voxel51.upload_to_gcs`
-  - [ ] Expected runtime: ~1 hour (~2 images/sec)
-  - [ ] Verify completion: ~8,981 train + 325 test images
+- [x] Upload full dataset:
+  - [x] Run: `python -m fathomnet_voxel51.upload_to_gcs`
+  - [x] Expected runtime: ~1 hour (~2 images/sec)
+  - [x] Verify completion: ~8,981 train + 325 test images
 
 ### 1.3 Ingest into FiftyOne
 
-- [ ] Test with small subset:
-  - [ ] Run: `python -m fathomnet_voxel51.ingest_dataset --limit 10`
-  - [ ] Verify samples created with `ground_truth` field
+- [x] Test with small subset:
+  - [x] Run: `python -m fathomnet_voxel51.ingest_dataset --limit 10`
+  - [x] Verify samples created with `ground_truth` field
 
-- [ ] Ingest full dataset:
-  - [ ] Run: `python -m fathomnet_voxel51.ingest_dataset --dataset_name fathomnet-2025`
-  - [ ] Verify dataset created with train/test splits
-  - [ ] Verify ground_truth detections field populated
+- [x] Ingest full dataset:
+  - [x] Run: `python -m fathomnet_voxel51.ingest_dataset --dataset_name fathomnet-2025`
+  - [x] Verify dataset created with train/test splits
+  - [x] Verify ground_truth detections field populated
 
 ### 1.4 Add Primary Labels (Optional)
 
-- [ ] Run: `python fathomnet_voxel51/03_add_primary_label.py fathomnet-2025`
-- [ ] Verify `primary_label` field added for embeddings visualization
-- [ ] Note: Uses most-common-label aggregation logic
+- [x] Run: `python fathomnet_voxel51/03_add_primary_label.py fathomnet-2025`
+- [x] Verify `primary_label` field added for embeddings visualization
+- [x] Note: Uses most-common-label aggregation logic
 
 **Implementation Notes**:
 
@@ -478,13 +478,13 @@ pre-commit run --all-files
 | Phase               | Description             | Time Estimate                   | Status      |
 | ------------------- | ----------------------- | ------------------------------- | ----------- |
 | Phase 0             | Repository Setup        | ~2-3 hours                      | ✅ Complete |
-| Phase 1             | Data Ingestion          | ~1.5 hours (mostly upload time) | Pending     |
-| Phase 2             | Data Exploration        | ~4-6 hours + GPU queue          | Pending     |
+| Phase 1             | Data Ingestion          | ~1.5 hours (mostly upload time) | ✅ Complete |
+| Phase 2             | Data Exploration        | ~4-6 hours + GPU queue          | In Progress |
 | Phase 3             | Model Evaluation        | ~4-6 hours + GPU queue          | Pending     |
 | Phase 4             | Label Cleanup           | ~2-4 hours                      | Pending     |
 | Phase 5             | Model Training          | ~8-12 hours + GPU queue         | Future Work |
 | Phase 6             | Documentation & Cleanup | ~2-3 hours                      | Pending     |
-| **Total Remaining** |                         | ~17-28 hours + GPU queue        |             |
+| **Total Remaining** |                         | ~16-26 hours + GPU queue        |             |
 
 **Dependencies**:
 
