@@ -25,13 +25,8 @@ This repo contains the workflow and analysis for the [FathomNet 2025 dataset](ht
 ├── docs/
 │   ├── ONBOARDING.md                # Project strategy and workflows
 │   ├── tasks.md                     # Project task tracking
-│   └── meeting_notes/               # MBARI sync meeting transcripts
-│       ├── 20251205-mbari-success-criteria.md
-│       ├── 20251215-mbari-success-criteria-2.md
-│       ├── 20251218-mbari-sync.md
-│       ├── 20260108-mbari-sync.md
-│       ├── 20260115-mbari-sync.md
-│       └── 20260122-mbari-sync.md
+│   ├── meeting_notes/               # MBARI sync meeting transcripts
+│   └── ...                          # Other documentation files
 ├── update_claude_mcp_config.py      # MCP configuration updater
 ├── pyproject.toml                   # Project dependencies and configuration
 ├── .pre-commit-config.yaml          # Pre-commit hooks (Ruff, Prettier)
