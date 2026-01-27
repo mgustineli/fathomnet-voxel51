@@ -4,6 +4,20 @@
 
 **FathomNet Database:** https://database.fathomnet.org/fathomnet/#/
 
+## Project Summary
+
+This repository demonstrates FiftyOne Enterprise capabilities for analyzing the FathomNet 2025 dataset (CVPR-FGVC marine species competition). The project simulates a real-world Customer Success scenario with MBARI (Monterey Bay Aquarium Research Institute), a marine research organization tackling hierarchical classification, data curation, and anomaly detection in underwater imagery.
+
+**Key Statistics:**
+
+- **Dataset Size:** 8,981 training + 325 test images (24.15 GiB total)
+- **Categories:** 79 hierarchical taxonomic categories (family → genus → species)
+- **Challenge:** Distinguishing similar species, identifying mislabeled samples, and discovering anomalies (trash, ROV equipment) in vast visual data
+- **Architecture:** Cloud-native (images in GCS, metadata in FiftyOne Enterprise)
+
+**Customer Use Case (MBARI):**
+Managing massive underwater ROV footage with hierarchical taxonomic labels. The workflow prioritizes label review → model evaluation → model training, with requirements for custom model support, GPU compute integration, and data lineage/traceability.
+
 ## Introduction
 
 Consider marine wildlife monitoring in coastal waters near California. Daily video footage analyzed by a standard ML model shows 2 octopuses, 1 shark, and 10 jellyfish - broad taxonomic categories. But species-level identification could reveal crucial details. Is that an Octopus rubescens, commonly found in this area, or is it an Octopus cyanea usually only observed in warm, tropical waters near Hawai'i? Accurate species classification is essential for understanding ocean ecosystems.

@@ -9,20 +9,34 @@ This repo contains the workflow and analysis for the [FathomNet 2025 dataset](ht
 ```text
 .
 ├── data/
-│   ├── dataset_test.json       # FathomNet Test annotations (COCO format)
-│   └── dataset_train.json      # FathomNet Train annotations (COCO format)
-├── fathomnet-voxel51/
+│   ├── dataset_test.json            # FathomNet Test annotations (COCO format)
+│   └── dataset_train.json           # FathomNet Train annotations (COCO format)
+├── fathomnet_voxel51/               # Main Python package
 │   ├── __init__.py
-│   ├── check_gcp_auth.py       # Script to verify GCP authentication
-│   ├── upload_to_gcs.py        # Stream images from FathomNet URLs to GCS
-│   └── ingest_dataset.py       # Ingest dataset into FiftyOne Enterprise
+│   ├── 00_check_gcp_auth.py        # Verify GCP authentication
+│   ├── 01_upload_to_gcs.py         # Stream images from FathomNet URLs to GCS
+│   ├── 02_ingest_dataset.py        # Ingest dataset into FiftyOne Enterprise
+│   ├── 03_add_primary_label.py     # Add aggregated labels for visualization
+│   └── debug_labels.py              # Dataset label debugging utility
 ├── notebooks/
-│   ├── 00_fathomnet-eda.ipynb  # Initial EDA and data exploration
-│   ├── 01_upload_to_gcp.ipynb  # Example notebook for uploading data to GCS
-│   └── 02_ingest_dataset.ipynb # Example notebook for FiftyOne ingestion
-├── pyproject.toml              # Project dependencies and configuration
-├── CLAUDE.md                   # Claude Code guidance for this repository
-├── GCLOUD.md                   # GCP/gsutil commands reference
+│   ├── 00_fathomnet-eda.ipynb      # Initial EDA and data exploration
+│   ├── 01_upload_to_gcp.ipynb      # Example notebook for uploading data to GCS
+│   └── 02_ingest_dataset.ipynb     # Example notebook for FiftyOne ingestion
+├── docs/
+│   ├── ONBOARDING.md                # Project strategy and workflows
+│   ├── tasks.md                     # Project task tracking
+│   └── meeting_notes/               # MBARI sync meeting transcripts
+│       ├── 20251205-mbari-success-criteria.md
+│       ├── 20251215-mbari-success-criteria-2.md
+│       ├── 20251218-mbari-sync.md
+│       ├── 20260108-mbari-sync.md
+│       ├── 20260115-mbari-sync.md
+│       └── 20260122-mbari-sync.md
+├── update_claude_mcp_config.py      # MCP configuration updater
+├── pyproject.toml                   # Project dependencies and configuration
+├── .pre-commit-config.yaml          # Pre-commit hooks (Ruff, Prettier)
+├── CLAUDE.md                        # Claude Code guidance for this repository
+├── GCLOUD.md                        # GCP/gsutil commands reference
 └── README.md
 ```
 
@@ -31,6 +45,8 @@ This repo contains the workflow and analysis for the [FathomNet 2025 dataset](ht
 **Customer Profile:** Marine Research Institute (MBARI)
 
 **Challenge:** Managing 79 hierarchical categories of marine life, identifying mislabeled samples, and discovering anomalies (trash, ROV equipment) in vast amounts of visual data.
+
+**Dataset:** FathomNet 2025 contains 8,981 training + 325 test images (24.15 GiB) with hierarchical taxonomic annotations spanning family → genus → species levels.
 
 **Key Workflows Implemented:**
 
@@ -41,6 +57,39 @@ This repo contains the workflow and analysis for the [FathomNet 2025 dataset](ht
 3. **Similarity Search:** Text-to-Image search to distinguish between sub-species (e.g., Octopus rubescens vs. Octopus cyanea).
 
 4. **Zero-Shot Prediction:** Leveraging the [`@voxel51/zero-shot-prediction`](https://docs.voxel51.com/plugins/plugins_ecosystem/zero_shot_prediction.html) plugin to bootstrap labels for unknown objects (e.g., "plastic bag").
+
+## Data Flow Architecture
+
+The project follows a cloud-native architecture where images remain in GCS and only metadata is stored in FiftyOne:
+
+```text
+FathomNet URLs
+    ↓
+[01_upload_to_gcs.py - Async streaming with aiohttp]
+    ↓
+Google Cloud Storage (gs://voxel51-test/fathomnet/{train,test}_images/)
+    ↓
+[COCO JSON annotations + GCS paths]
+    ↓
+[02_ingest_dataset.py - FiftyOne dataset creation]
+    ↓
+FiftyOne Enterprise Dataset (fathomnet-2025)
+    ↓
+[03_add_primary_label.py - Label aggregation (optional)]
+    ↓
+Analysis & Curation
+  - Embeddings Visualization
+  - Similarity Search
+  - Model Evaluation
+  - Zero-Shot Prediction
+```
+
+**Design Benefits:**
+
+- Cost efficiency (no data duplication)
+- Scalability (cloud-native storage)
+- No local disk I/O required
+- Async processing (~50 concurrent uploads, ~2 images/sec)
 
 ## Setup & Installation
 
