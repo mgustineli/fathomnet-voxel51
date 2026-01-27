@@ -37,6 +37,3 @@ build-backend = "setuptools.build_meta"
 where = ["."]
 include = ["fathomnet_voxel51"]
 namespaces = false
-
-[tool.uv]
-extra-index-url = ["https://pypi.fiftyone.ai"]

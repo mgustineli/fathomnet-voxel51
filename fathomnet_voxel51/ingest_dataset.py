@@ -23,6 +23,9 @@ USAGE:
 
     # Test with a subset (10 samples per split):
     $ python -m fathomnet_voxel51.ingest_dataset --recreate --limit 10
+
+    # Create a test dataset with custom name and 100 samples per split:
+    $ python -m fathomnet_voxel51.ingest_dataset --name fathomnet-test --limit 100
 """
 
 import argparse
@@ -157,22 +160,22 @@ def create_samples_from_split(
     return samples
 
 
-def ingest(recreate: bool = False, limit: int | None = None):
+def ingest(dataset_name: str, recreate: bool = False, limit: int | None = None):
     """Main ingestion function."""
     # Check if dataset exists
-    if fo.dataset_exists(DATASET_NAME):
+    if fo.dataset_exists(dataset_name):
         if recreate:
-            print(f"Deleting existing dataset '{DATASET_NAME}'...")
-            fo.delete_dataset(DATASET_NAME)
+            print(f"Deleting existing dataset '{dataset_name}'...")
+            fo.delete_dataset(dataset_name)
         else:
             print(
-                f"Dataset '{DATASET_NAME}' already exists. Use --recreate to replace."
+                f"Dataset '{dataset_name}' already exists. Use --recreate to replace."
             )
             return
 
     # Create new dataset on FiftyOne
-    print(f"Creating dataset '{DATASET_NAME}'...")
-    dataset = fo.Dataset(name=DATASET_NAME)
+    print(f"Creating dataset '{dataset_name}'...")
+    dataset = fo.Dataset(name=dataset_name)
 
     # Process each split
     all_samples = []
@@ -188,7 +191,7 @@ def ingest(recreate: bool = False, limit: int | None = None):
     # Make persistent
     dataset.persistent = True
 
-    print(f"\nSuccessfully created dataset '{DATASET_NAME}'")
+    print(f"\nSuccessfully created dataset '{dataset_name}'")
     print(f"Total samples: {len(dataset)}")
     print(f"Train samples: {len(dataset.match_tags('train'))}")
     print(f"Test samples: {len(dataset.match_tags('test'))}")
@@ -197,6 +200,12 @@ def ingest(recreate: bool = False, limit: int | None = None):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--name",
+        type=str,
+        default=DATASET_NAME,
+        help=f"Dataset name (default: {DATASET_NAME})",
+    )
     parser.add_argument(
         "--recreate",
         action="store_true",
@@ -210,7 +219,7 @@ def main():
     )
     args = parser.parse_args()
 
-    ingest(recreate=args.recreate, limit=args.limit)
+    ingest(dataset_name=args.name, recreate=args.recreate, limit=args.limit)
 
 
 if __name__ == "__main__":
