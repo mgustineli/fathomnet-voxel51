@@ -9,28 +9,29 @@ This repo contains the workflow and analysis for the [FathomNet 2025 dataset](ht
 ```text
 .
 ├── data/
-│   ├── dataset_test.json            # FathomNet Test annotations (COCO format)
-│   └── dataset_train.json           # FathomNet Train annotations (COCO format)
-├── fathomnet_voxel51/               # Main Python package
+│   ├── dataset_test.json             # FathomNet Test annotations (COCO format)
+│   └── dataset_train.json            # FathomNet Train annotations (COCO format)
+├── fathomnet_voxel51/                # Main Python package
 │   ├── __init__.py
-│   ├── 00_check_gcp_auth.py        # Verify GCP authentication
-│   ├── 01_upload_to_gcs.py         # Stream images from FathomNet URLs to GCS
-│   ├── 02_ingest_dataset.py        # Ingest dataset into FiftyOne Enterprise
-│   ├── 03_add_primary_label.py     # Add aggregated labels for visualization
-│   └── debug_labels.py              # Dataset label debugging utility
-├── notebooks/
-│   ├── 00_fathomnet-eda.ipynb      # Initial EDA and data exploration
-│   ├── 01_upload_to_gcp.ipynb      # Example notebook for uploading data to GCS
-│   └── 02_ingest_dataset.ipynb     # Example notebook for FiftyOne ingestion
-├── docs/
-│   ├── ONBOARDING.md                # Project strategy and workflows
-│   ├── tasks.md                     # Project task tracking
-│   ├── meeting_notes/               # MBARI sync meeting transcripts
-│   └── ...                          # Other documentation files
-├── pyproject.toml                   # Project dependencies and configuration
-├── .pre-commit-config.yaml          # Pre-commit hooks (Ruff, Prettier)
-├── CLAUDE.md                        # Claude Code guidance for this repository
-├── GCLOUD.md                        # GCP/gsutil commands reference
+│   ├── setup_fiftyone_credentials.py # Shared FiftyOne credential configuration
+│   ├── 00_check_gcp_auth.py          # Verify GCP authentication
+│   ├── 01_upload_to_gcs.py           # Stream images from FathomNet URLs to GCS
+│   ├── 02_ingest_dataset.py          # Ingest dataset into FiftyOne Enterprise
+│   ├── 03_add_primary_label.py       # Add aggregated labels for visualization
+│   └── debug_labels.py               # Dataset label debugging utility
+├── notebooks/                        # Jupyter notebooks for exploration and analysis
+│   ├── 00_fathomnet-eda.ipynb        # Initial EDA and data exploration
+│   ├── 01_upload_to_gcs.ipynb        # Example notebook for uploading data to GCS
+│   └── 02_ingest_dataset.ipynb       # Example notebook for FiftyOne ingestion
+├── docs/                             # Project documentation
+│   ├── ONBOARDING.md                 # Project strategy and workflows
+│   ├── tasks.md                      # Project task tracking
+│   ├── meeting_notes/                # MBARI sync meeting transcripts
+│   └── ...                           # Other documentation files
+├── pyproject.toml                    # Project dependencies and configuration
+├── .pre-commit-config.yaml           # Pre-commit hooks (Ruff, Prettier)
+├── CLAUDE.md                         # Claude Code guidance for this repository
+├── GCLOUD.md                         # GCP/gsutil commands reference
 └── README.md
 ```
 
@@ -135,13 +136,18 @@ You will need the following credentials set in your environment. The project use
 2.  Add the following variables to it:
 
 ```env
-# FiftyOne Enterprise
-FIFTYONE_API_URI="https://<your-deployment>.fiftyone.ai"
-FIFTYONE_API_KEY="<your-api-key>"
+# FiftyOne Enterprise (supports multiple deployments)
+MURILO_FIFTYONE_API_URI="https://murilo.dev.fiftyone.ai"
+MURILO_FIFTYONE_API_KEY="<your-api-key>"
+
+PRERNA_FIFTYONE_API_URI="https://prerna.dev.fiftyone.ai"
+PRERNA_FIFTYONE_API_KEY="<your-api-key>"
 
 # GCP Service Account (optional - only if not using ADC)
 # GOOGLE_APPLICATION_CREDENTIALS="/path/to/your/gcp_credentials.json"
 ```
+
+> _Note: Scripts default to the Murilo deployment. Use `--deployment prerna` to switch deployments._
 
 #### GCP Authentication Options
 
@@ -177,8 +183,11 @@ python -m fathomnet_voxel51.upload_to_gcs --limit 100
 Create the FiftyOne dataset with both train and test splits. This step only needs to be run **once** - the dataset persists in FiftyOne Enterprise.
 
 ```bash
-# Ingest full dataset (run once)
+# Ingest full dataset using Murilo deployment (default)
 python -m fathomnet_voxel51.ingest_dataset
+
+# Use Prerna deployment
+python -m fathomnet_voxel51.ingest_dataset --deployment prerna
 
 # Test with a subset first (optional)
 python -m fathomnet_voxel51.ingest_dataset --limit 10
