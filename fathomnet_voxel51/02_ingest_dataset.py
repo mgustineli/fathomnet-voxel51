@@ -12,11 +12,17 @@ The images remain in GCS - only metadata is stored in FiftyOne.
 PREREQUISITES:
     1. Images uploaded to GCS via upload_to_gcs.py
     2. FiftyOne credentials configured in .env:
-        FIFTYONE_API_URI="https://<deployment>.fiftyone.ai"
-        FIFTYONE_API_KEY="<api-key>"
+        MURILO_FIFTYONE_API_URI="https://murilo.dev.fiftyone.ai"
+        MURILO_FIFTYONE_API_KEY="<api-key>"
+        PRERNA_FIFTYONE_API_URI="https://prerna.dev.fiftyone.ai"
+        PRERNA_FIFTYONE_API_KEY="<api-key>"
 
 USAGE:
+    # Use Murilo deployment (default):
     $ python -m fathomnet_voxel51.ingest_dataset
+
+    # Use Prerna deployment:
+    $ python -m fathomnet_voxel51.ingest_dataset --deployment prerna
 
     # Recreate dataset (deletes existing):
     $ python -m fathomnet_voxel51.ingest_dataset --recreate
@@ -35,6 +41,13 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 load_dotenv()
+
+from fathomnet_voxel51.setup_fiftyone_credentials import (  # noqa: E402
+    setup_fiftyone_credentials,
+)
+
+# Set default deployment to Murilo
+setup_fiftyone_credentials("murilo")
 
 import fiftyone as fo  # noqa: E402
 from tqdm import tqdm  # noqa: E402
@@ -201,6 +214,13 @@ def ingest(dataset_name: str, recreate: bool = False, limit: int | None = None):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
+        "--deployment",
+        type=str,
+        choices=["murilo", "prerna"],
+        default="murilo",
+        help="FiftyOne deployment to use (default: murilo)",
+    )
+    parser.add_argument(
         "--dataset_name",
         type=str,
         default=DATASET_NAME,
@@ -218,6 +238,10 @@ def main():
         help="Limit samples per split for testing (default: all)",
     )
     args = parser.parse_args()
+
+    # Override deployment if specified
+    if args.deployment != "murilo":
+        setup_fiftyone_credentials(args.deployment)
 
     ingest(dataset_name=args.dataset_name, recreate=args.recreate, limit=args.limit)
 

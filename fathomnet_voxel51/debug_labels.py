@@ -3,10 +3,29 @@ Debug script to check ground_truth labels in FiftyOne dataset.
 
 This script helps diagnose why the embeddings panel may not show
 a color-by-label option.
+
+USAGE:
+    # Use Murilo deployment (default):
+    $ python -m fathomnet_voxel51.debug_labels
+
+    # Use Prerna deployment:
+    $ python -m fathomnet_voxel51.debug_labels --deployment prerna
 """
 
-import fiftyone as fo
+import argparse
+
 from dotenv import load_dotenv
+
+load_dotenv()
+
+from fathomnet_voxel51.setup_fiftyone_credentials import (  # noqa: E402
+    setup_fiftyone_credentials,
+)
+
+# Set default deployment to Murilo
+setup_fiftyone_credentials("murilo")
+
+import fiftyone as fo  # noqa: E402
 
 DATASET_NAME = "fathomnet-2025"
 
@@ -98,6 +117,33 @@ def debug_dataset():
         )
 
 
-if __name__ == "__main__":
-    load_dotenv()
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--deployment",
+        type=str,
+        choices=["murilo", "prerna"],
+        default="murilo",
+        help="FiftyOne deployment to use (default: murilo)",
+    )
+    parser.add_argument(
+        "--dataset_name",
+        type=str,
+        default=DATASET_NAME,
+        help=f"Dataset name to debug (default: {DATASET_NAME})",
+    )
+    args = parser.parse_args()
+
+    # Override deployment if specified
+    if args.deployment != "murilo":
+        setup_fiftyone_credentials(args.deployment)
+
+    # Update global DATASET_NAME if provided
+    global DATASET_NAME
+    DATASET_NAME = args.dataset_name
+
     debug_dataset()
+
+
+if __name__ == "__main__":
+    main()

@@ -6,19 +6,32 @@ common label from ground_truth detections. This field will appear in the
 embeddings panel's "color by" dropdown.
 
 USAGE:
-    # Add to test dataset:
-    $ python add_primary_label.py fathomnet-test
+    # Add to test dataset (Murilo deployment by default):
+    $ python -m fathomnet_voxel51.03_add_primary_label fathomnet-test
+
+    # Use Prerna deployment:
+    $ python -m fathomnet_voxel51.03_add_primary_label fathomnet-test --deployment prerna
 
     # Add to full dataset:
-    $ python add_primary_label.py fathomnet-2025
+    $ python -m fathomnet_voxel51.03_add_primary_label fathomnet-2025
 """
 
-import sys
+import argparse
 from collections import Counter
 
-import fiftyone as fo
 from dotenv import load_dotenv
-from tqdm import tqdm
+
+load_dotenv()
+
+from fathomnet_voxel51.setup_fiftyone_credentials import (  # noqa: E402
+    setup_fiftyone_credentials,
+)
+
+# Set default deployment to Murilo
+setup_fiftyone_credentials("murilo")
+
+import fiftyone as fo  # noqa: E402
+from tqdm import tqdm  # noqa: E402
 
 
 def add_primary_labels(dataset_name: str):
@@ -82,15 +95,26 @@ def add_primary_labels(dataset_name: str):
 
 
 def main():
-    load_dotenv()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "dataset_name",
+        type=str,
+        help="Name of the FiftyOne dataset to add primary_label field to",
+    )
+    parser.add_argument(
+        "--deployment",
+        type=str,
+        choices=["murilo", "prerna"],
+        default="murilo",
+        help="FiftyOne deployment to use (default: murilo)",
+    )
+    args = parser.parse_args()
 
-    if len(sys.argv) != 2:
-        print(__doc__)
-        print(f"\nAvailable datasets: {fo.list_datasets()}")
-        sys.exit(1)
+    # Override deployment if specified
+    if args.deployment != "murilo":
+        setup_fiftyone_credentials(args.deployment)
 
-    dataset_name = sys.argv[1]
-    add_primary_labels(dataset_name)
+    add_primary_labels(args.dataset_name)
 
 
 if __name__ == "__main__":
