@@ -159,7 +159,7 @@ PRERNA_FIFTYONE_API_KEY="<your-api-key>"
 To verify your GCP authentication setup, run:
 
 ```bash
-python -m fathomnet_voxel51.check_gcp_auth
+python -m fathomnet_voxel51.00_check_gcp_auth
 ```
 
 ## Usage
@@ -170,10 +170,10 @@ Stream images from FathomNet URLs directly to Google Cloud Storage (no local dis
 
 ```bash
 # Upload all images (~1 hour)
-python -m fathomnet_voxel51.upload_to_gcs
+python -m fathomnet_voxel51.01_upload_to_gcs
 
 # Or test with a subset first
-python -m fathomnet_voxel51.upload_to_gcs --limit 100
+python -m fathomnet_voxel51.01_upload_to_gcs --limit 100
 ```
 
 > _Expected runtime: ~1 hour (train: ~63 min, test: ~3 min) at ~2 images/sec._
@@ -184,16 +184,16 @@ Create the FiftyOne dataset with both train and test splits. This step only need
 
 ```bash
 # Ingest full dataset using Murilo deployment (default)
-python -m fathomnet_voxel51.ingest_dataset
+python -m fathomnet_voxel51.02_ingest_dataset
 
 # Use Prerna deployment
-python -m fathomnet_voxel51.ingest_dataset --deployment prerna
+python -m fathomnet_voxel51.02_ingest_dataset --deployment prerna
 
 # Test with a subset first (optional)
-python -m fathomnet_voxel51.ingest_dataset --limit 10
+python -m fathomnet_voxel51.02_ingest_dataset --limit 10
 
 # Delete and recreate dataset (if needed)
-python -m fathomnet_voxel51.ingest_dataset --recreate
+python -m fathomnet_voxel51.02_ingest_dataset --recreate
 ```
 
 > _Note: Running without `--recreate` on an existing dataset will skip ingestion. Use `--recreate` to delete and rebuild the dataset from scratch._

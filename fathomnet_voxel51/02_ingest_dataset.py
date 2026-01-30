@@ -10,7 +10,7 @@ This script creates a FiftyOne dataset by:
 The images remain in GCS - only metadata is stored in FiftyOne.
 
 PREREQUISITES:
-    1. Images uploaded to GCS via upload_to_gcs.py
+    1. Images uploaded to GCS via 01_upload_to_gcs.py
     2. FiftyOne credentials configured in .env:
         MURILO_FIFTYONE_API_URI="https://murilo.dev.fiftyone.ai"
         MURILO_FIFTYONE_API_KEY="<api-key>"
@@ -19,19 +19,19 @@ PREREQUISITES:
 
 USAGE:
     # Use Murilo deployment (default):
-    $ python -m fathomnet_voxel51.ingest_dataset
+    $ python -m fathomnet_voxel51.02_ingest_dataset
 
     # Use Prerna deployment:
-    $ python -m fathomnet_voxel51.ingest_dataset --deployment prerna
+    $ python -m fathomnet_voxel51.02_ingest_dataset --deployment prerna
 
     # Recreate dataset (deletes existing):
-    $ python -m fathomnet_voxel51.ingest_dataset --recreate
+    $ python -m fathomnet_voxel51.02_ingest_dataset --recreate
 
     # Test with a subset (10 samples per split):
-    $ python -m fathomnet_voxel51.ingest_dataset --recreate --limit 10
+    $ python -m fathomnet_voxel51.02_ingest_dataset --recreate --limit 10
 
     # Create a test dataset with custom name and 100 samples per split:
-    $ python -m fathomnet_voxel51.ingest_dataset --dataset_name fathomnet-test --limit 100
+    $ python -m fathomnet_voxel51.02_ingest_dataset --dataset_name fathomnet-test --limit 100
 """
 
 import argparse
