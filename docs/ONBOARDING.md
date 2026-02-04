@@ -1,56 +1,111 @@
-# Murilo Gustineli Onboarding Project – FathomNet 2025 @ CVPR-FGVC
+# FathomNet 2025 @ FiftyOne Enterprise
 
-**Kaggle Dataset:** https://www.kaggle.com/competitions/fathomnet-2025/
+> Onboarding project demonstrating FiftyOne Enterprise capabilities for marine species classification
 
-**FathomNet Database:** https://database.fathomnet.org/fathomnet/#/
+**Links:**
 
-## Project Summary
+- [Kaggle Competition](https://www.kaggle.com/competitions/fathomnet-2025/)
+- [FathomNet Database](https://database.fathomnet.org/fathomnet/#/)
 
-This repository demonstrates FiftyOne Enterprise capabilities for analyzing the [**FathomNet 2025 dataset**](https://www.kaggle.com/competitions/fathomnet-2025) (CVPR-FGVC marine species competition). The project simulates a real-world Customer Success scenario with MBARI (Monterey Bay Aquarium Research Institute), a marine research organization tackling hierarchical classification, data curation, and anomaly detection in underwater imagery.
+## Project Overview
 
-**Key Statistics:**
+This repository demonstrates FiftyOne Enterprise capabilities for analyzing the FathomNet 2025 dataset (CVPR-FGVC marine species competition). The project simulates a Customer Success scenario with a marine research organization tackling hierarchical classification, data curation, and anomaly detection in underwater imagery.
 
-- **Dataset Size:** 8,981 training + 325 test images (24.15 GiB total)
-- **Categories:** 79 hierarchical taxonomic categories (family → genus → species)
-- **Challenge:** Distinguishing similar species, identifying mislabeled samples, and discovering anomalies (trash, ROV equipment) in vast visual data
-- **Architecture:** Cloud-native (images in GCS, metadata in FiftyOne Enterprise)
+| Metric          | Value                                    |
+| --------------- | ---------------------------------------- |
+| Training Images | 8,981                                    |
+| Test Images     | 325                                      |
+| Total Size      | 24.15 GiB                                |
+| Categories      | 79 (family → genus → species)            |
+| Architecture    | Cloud-native (GCS + FiftyOne Enterprise) |
 
-**Customer Use Case (MBARI):**
-Managing massive underwater ROV footage with hierarchical taxonomic labels. The workflow prioritizes label review → model evaluation → model training, with requirements for custom model support, GPU compute integration, and data lineage/traceability.
+**Core Challenges:**
 
-## Introduction
+- Distinguishing visually similar species across taxonomic ranks
+- Identifying mislabeled samples at scale
+- Discovering anomalies (trash, ROV equipment) in vast underwater footage
 
-Consider marine wildlife monitoring in coastal waters near California. Daily video footage analyzed by a standard ML model shows 2 octopuses, 1 shark, and 10 jellyfish - broad taxonomic categories. But species-level identification could reveal crucial details. Is that an Octopus rubescens, commonly found in this area, or is it an Octopus cyanea usually only observed in warm, tropical waters near Hawai'i? Accurate species classification is essential for understanding ocean ecosystems.
+---
 
-Hierarchical classification—architectures that structure data to capture relationships across taxonomic ranks (e.g., from broad categories like families to specific species)—can significantly improve classification accuracy, as demonstrated by [recent advances](https://imageomics.github.io/bioclip/) in machine learning. In the field of marine ecology, accurate taxonomic classification is essential for addressing fundamental questions: What species exist in a particular place? What is the ecosystem biodiversity and how does it change over time? Questions like these motivate the focus of our 2025 FathomNet Competition, aiming to push the boundaries of taxonomic accuracy and inspire innovative solutions in this space.
+## Problem Context
 
-## Dataset
+Marine wildlife monitoring produces vast amounts of underwater footage. A standard ML model might identify "2 octopuses, 1 shark, 10 jellyfish"—but species-level identification reveals crucial ecological details. Is that an _Octopus rubescens_ (common locally) or an _Octopus cyanea_ (typically found in tropical waters near Hawai'i)?
 
-The dataset is curated data from the broader [FathomNet Database](https://database.fathomnet.org/fathomnet/#/) image set to tackle hierarchical classification. The training set contains 79 categories of marine animals of varying taxonomic ranks (e.g., family, genus, species), wherein 300 example instances of each category are provided for training. The test set contains the same 79 categories, where roughly 10 example instances of each category are provided for evaluation. The challenge is to develop a model that can accurately classify these taxa and ideally leverage their taxonomic information to do so. Developing these solutions for ocean research will enable scientists to process and explore ocean data more efficiently.
+**Why This Matters:**
 
-## Strategy
+- Accurate taxonomic classification answers fundamental questions: What species exist here? How does biodiversity change over time?
+- [Hierarchical classification](https://imageomics.github.io/bioclip/) leverages taxonomic relationships to improve accuracy
+- Data quality (label review) is the primary bottleneck—not model training
 
-I am acting as a Support Engineer for a marine research institute (like MBARI). They are struggling with Hierarchical Classification—confusing similar species across different families. They have 79 categories and need to clean their data before training a model.
+---
 
-### Proposed Workflow:
+## Demo Workflow
 
-#### 1. Embedding Visualization & Clustering
+### 1. Embeddings Visualization ✅
 
-- **Goal:** Visualize the "visual distance" between the 79 categories.
-- **Why:** Demonstrate if the "families" of marine animals cluster together naturally. Do sharks cluster away from jellyfish?
+**Goal:** Visualize taxonomic distance between 79 marine species categories
 
-#### 2. Image & Text Similarity Search
+- Embeddings computed with CLIP + DINOv2 on 24,487 patches (bounding boxes)
+- Interactive lasso selection for exploring clusters
+- Species within same family cluster together naturally
+- Outliers visible as isolated points (potential mislabels)
 
-- **Goal:** Solve the "Needle in a Haystack" problem.
-- **Why:** Use natural language search to find "red octopus" vs "blue octopus" to help distinguish between specific species like Octopus rubescens and Octopus cyanea.
+**Value:** Visual exploration reveals annotation errors at a glance
 
-#### 3. Model Evaluation
+### 2. Text-to-Image Similarity Search ✅
 
-- **Goal:** Identify label errors.
-- **Why:** Since the dataset relies on contributors, are there mislabeled images? Use a pre-trained model (or Zero-Shot) to find where the model disagrees with the ground truth.
+**Goal:** Find specific samples using natural language queries
 
-#### 4. Community Plugin: Zero-Shot Prediction
+Example queries:
 
-- **Plugin:** @voxel51/zero-shot-prediction (using CLIP/OWL-ViT).
-- **Goal:** Attempt to classify the 79 categories without training a custom model.
-- **Why:** This is a powerful "Time to Value" demo for customers. It shows how they can get preliminary labels instantly.
+- Species distinction: "red octopus" vs "blue octopus"
+- Feature-based: "tentacles", "bioluminescence", "translucent body"
+- Anomaly detection: "plastic bag", "trash", "ROV equipment"
+
+**Value:** Natural language search helps experts find needles in haystacks
+
+### 3. Image Similarity Search ✅
+
+**Goal:** Find visually similar samples for deduplication and rare class discovery
+
+- Select a sample, find top-N similar samples
+- Identify duplicates/near-duplicates across deployments
+- Discover more examples of rare species
+
+**Value:** Accelerates discovery and data quality assessment
+
+### 4. Bulk Label Editing ✅
+
+**Goal:** Efficiently review and correct thousands of labels
+
+- Custom plugin with lasso selection in embeddings view
+- Two modes: change selected samples OR change view excluding selections
+- Single operation replaces 5+ clicks per manual change
+- Snapshot feature for version control
+
+**Value:** Reduces label review from hours to minutes
+
+### 5. Model Evaluation (Future)
+
+**Goal:** Identify label errors using model predictions vs ground truth
+
+- Interactive confusion matrices
+- Precision/recall/F1 metrics per category
+- Scenario analysis (performance by collection, season, depth)
+- High-confidence disagreement detection
+
+**Status:** Will use custom model predictions (zero-shot plugin has compatibility issues)
+
+### 6. Complete Pipeline (Roadmap)
+
+```
+Data Ingestion → Embeddings → Label Review → Model Training → Evaluation → Iteration
+```
+
+Future work: GPU compute integration, YOLO v8 trainer, model lineage/traceability
+
+---
+
+## Technical Notes
+
+**Zero-Shot Prediction Plugin:** The community plugin ([jacobmarks/zero-shot-prediction-plugin](https://github.com/jacobmarks/zero-shot-prediction-plugin)) has compatibility issues with the current FiftyOne Enterprise platform. Model evaluation will use custom classifiers instead.

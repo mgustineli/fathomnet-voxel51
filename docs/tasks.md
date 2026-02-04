@@ -1,24 +1,9 @@
 # Tasks: FathomNet 2025 @ FiftyOne Enterprise
 
-**Status**: Data ingestion complete, ready for embeddings and exploration
-**Current Phase**: Phase 2 - Data Exploration
-**Last Updated**: 2026-01-27
+**Current Phase**: Phase 2 - Data Exploration (90% Complete)
+**Last Updated**: 2026-02-04
 
----
-
-## Overview
-
-This project demonstrates FiftyOne Enterprise capabilities for analyzing the FathomNet 2025 dataset (CVPR-FGVC marine species competition). We're simulating a real-world Customer Success scenario with MBARI, tackling hierarchical classification, data curation, and anomaly detection in underwater imagery.
-
-**Key Workflows**:
-
-1. **Embeddings Visualization & Clustering** - Visualize taxonomic distance between 79 marine species categories
-2. **Image & Text Similarity Search** - Text-to-image search to distinguish similar species (e.g., Octopus rubescens vs Octopus cyanea)
-3. **Model Evaluation** - Identify label errors using zero-shot prediction compared to ground truth
-4. **Zero-Shot Prediction** - Use `@voxel51/zero-shot-prediction` plugin for rapid prototyping
-
-**Dataset**: 8,981 training + 325 test images (24.15 GiB), 79 hierarchical taxonomic categories
-**Architecture**: Cloud-native (images in GCS, metadata in FiftyOne Enterprise)
+See [ONBOARDING.md](./ONBOARDING.md) for project overview and demo workflow.
 
 ---
 
@@ -39,9 +24,8 @@ This project demonstrates FiftyOne Enterprise capabilities for analyzing the Fat
 
 - [x] 0.3 Documentation
   - [x] `README.md` with setup instructions and data flow architecture
-  - [x] `docs/ONBOARDING.md` with project strategy and workflows
-  - [x] `docs/meeting_notes/` with 6 MBARI sync meeting transcripts
-  - [x] `docs/tasks.md` with checkbox-based task tracking
+  - [x] `docs/ONBOARDING.md` with project overview and demo workflow
+  - [x] `docs/tasks.md` with task tracking
 
 - [x] 0.4 Bug fixes and improvements
   - [x] Fixed corrupted notebook JSON (`01_upload_to_gcp.ipynb`, `02_ingest_dataset.ipynb`)
@@ -100,70 +84,72 @@ This project demonstrates FiftyOne Enterprise capabilities for analyzing the Fat
 
 ---
 
-## Phase 2: Data Exploration
+## Phase 2: Data Exploration ✅ 90% COMPLETED
 
 **Goal**: Use FiftyOne to explore dataset, visualize embeddings, and perform similarity search.
 
 ### 2.1 Generate Embeddings
 
-- [ ] Research embedding options:
-  - [ ] Check FiftyOne docs for compute embeddings
-  - [ ] Options: CLIP (multimodal), ResNet (vision-only)
-  - [ ] Consider GPU compute requirements (Modal: $0.10-$0.50/hr)
+- [x] Research embedding options:
+  - [x] Check FiftyOne docs for compute embeddings
+  - [x] Options: CLIP (multimodal), DINOv2 (vision-only)
+  - [x] Consider GPU compute requirements (internal on-prem for production scale)
 
-- [ ] Generate embeddings:
-  - [ ] Run FiftyOne embeddings computation
-  - [ ] Wait for completion (GPU job)
-  - [ ] Verify embeddings field added to all samples
+- [x] Generate embeddings:
+  - [x] Run FiftyOne embeddings computation (CLIP + DINOv2)
+  - [x] Successfully computed on both fathomnet-test and fathomnet-2025 datasets
+  - [x] Verify embeddings field added to all samples
 
-- [ ] Document embedding configuration:
-  - [ ] Model used (CLIP vs ResNet)
-  - [ ] Embedding dimensions
-  - [ ] Compute time and cost
+- [x] Document embedding configuration:
+  - [x] Models used: CLIP (multimodal), DINOv2 (vision-only)
+  - [x] Successfully computed on patches (bounding boxes)
+  - [x] Note: GPU delegated operations setup deferred to post-onboarding
 
-### 2.2 Embeddings Visualization
+**Implementation Notes:**
 
-- [ ] Open FiftyOne App:
-  - [ ] Load `fathomnet-2025` dataset
-  - [ ] Open embeddings panel
-  - [ ] Color by: `primary_label`
+- Embeddings computed on patches/bounding boxes (ground_truth.detections)
+- CLIP enables text-to-image similarity search
+- DINOv2 provides robust visual features for marine imagery
 
-- [ ] Analyze clustering patterns:
-  - [ ] Do species within same family cluster together?
-  - [ ] Are sharks separated from jellyfish?
-  - [ ] Identify outliers (potential mislabels)
-  - [ ] Screenshot interesting clusters
+### 2.2 Embeddings Visualization ✅ COMPLETED
 
-- [ ] Document findings:
-  - [ ] Create `docs/embeddings_analysis.md`
-  - [ ] Include screenshots of embeddings visualization
-  - [ ] Note taxonomic clustering observations
-  - [ ] List outlier samples for review
+- [x] Open FiftyOne App:
+  - [x] Load `fathomnet-2025` dataset
+  - [x] Open embeddings panel
+  - [x] Color by: `ground_truth.detections.label`
 
-### 2.3 Text-to-Image Similarity Search
+- [x] Analyze clustering patterns:
+  - [x] Species within same family cluster together (visible in embeddings plot)
+  - [x] Taxonomic groups show clear separation
+  - [x] Identify outliers (potential mislabels visible in sparse regions)
+  - [x] Screenshot captured showing 24,487 patches colored by label
 
-- [ ] Test species distinction queries:
-  - [ ] "red octopus" vs "blue octopus"
-  - [ ] "tentacles"
-  - [ ] "bioluminescence"
-  - [ ] "translucent body"
+**Key Findings:** Embeddings show excellent taxonomic clustering. Species within same family cluster together. Outliers visible as isolated points (potential annotation errors).
 
-- [ ] Test family-level queries:
-  - [ ] "shark"
-  - [ ] "jellyfish"
-  - [ ] "octopus"
+### 2.3 Text-to-Image Similarity Search ✅ COMPLETED
 
-- [ ] Test for anomalies:
-  - [ ] "plastic bag"
-  - [ ] "trash"
-  - [ ] "equipment"
-  - [ ] "ROV"
+- [x] Test species distinction queries:
+  - [x] Natural language search working (e.g., "starfish")
+  - [x] Can distinguish between species using descriptive text
+  - [x] "tentacles", "bioluminescence" queries functional
 
-- [ ] Document successful query patterns:
-  - [ ] Create `docs/similarity_search_examples.md`
-  - [ ] Include query text and top results
-  - [ ] Note which queries work well vs poorly
-  - [ ] Screenshot interesting results
+- [x] Test family-level queries:
+  - [x] "shark", "jellyfish", "octopus" queries working
+  - [x] CLIP embeddings enable semantic search
+
+- [x] Test for anomalies:
+  - [x] Can search for "plastic bag", "trash", "equipment", "ROV"
+  - [x] Useful for data quality checks
+
+**Key Findings:** CLIP-based search enables natural language queries. Useful for finding specific characteristics ("translucent body", "tentacles"), distinguishing similar species, and identifying non-biological objects (trash, equipment).
+
+### 2.4 Image Similarity Search ✅ COMPLETED
+
+- [x] Image-based similarity search working
+- [x] "Find similar samples" workflow enabled
+- [x] Useful for finding duplicates and near-duplicates
+
+**Phase 2 Status:** Core functionality complete and ready for demo.
 
 ---
 
@@ -171,13 +157,13 @@ This project demonstrates FiftyOne Enterprise capabilities for analyzing the Fat
 
 **Goal**: Run zero-shot prediction and compare to ground truth to identify label errors.
 
+**⚠️ Status Update**: Zero-shot prediction plugin (https://github.com/jacobmarks/zero-shot-prediction-plugin) has compatibility issues with current FiftyOne Enterprise platform. UI errors encountered during execution. This phase will be revisited with custom model evaluation workflow using MBARI's existing classifiers.
+
 ### 3.1 Install Zero-Shot Prediction Plugin
 
-- [ ] Install plugin:
-  ```bash
-  fiftyone plugins download https://github.com/voxel51/zero-shot-prediction-plugin
-  ```
-- [ ] Verify installation: check available plugins in FiftyOne App
+- [x] Attempted plugin installation
+- [x] Identified compatibility issues with platform
+- [ ] **DEFERRED**: Will use custom model predictions instead of zero-shot plugin
 
 ### 3.2 Run Zero-Shot Prediction
 
@@ -320,32 +306,18 @@ This project demonstrates FiftyOne Enterprise capabilities for analyzing the Fat
 
 ### 6.1 Code Quality
 
-- [ ] Run pre-commit hooks:
-  ```bash
-  pre-commit run --all-files
-  ```
+- [ ] Run pre-commit hooks: `pre-commit run --all-files`
 - [ ] Fix any Ruff or Prettier issues
-- [ ] Add docstrings to new functions
 
 ### 6.2 Update Documentation
 
 - [ ] Update `README.md` with final results
-- [ ] Update `docs/ONBOARDING.md` with completed workflows
 - [ ] Create `docs/workflow_tutorial.md` with step-by-step guide
-- [ ] Consolidate all analysis docs in `docs/`
 
-### 6.3 Meeting Notes Index
-
-- [ ] Create `docs/meeting_notes/README.md`:
-  - [ ] Summary of each meeting
-  - [ ] Key takeaways and action items
-  - [ ] Cross-references to implemented features
-
-### 6.4 Final Commits
+### 6.3 Final Release
 
 - [ ] Commit all documentation and analysis results
 - [ ] Tag release: `v1.0-onboarding-complete`
-- [ ] Push to repository
 
 ---
 
@@ -367,21 +339,11 @@ fathomnet_voxel51/
 
 ```
 docs/
-├── ONBOARDING.md                    ✅ exists - Project strategy and workflows
-├── tasks.md                         ✅ exists - This file (checkbox task tracking)
-├── embeddings_analysis.md           (new - Embeddings visualization findings)
-├── similarity_search_examples.md    (new - Text-to-image search queries)
-├── model_evaluation.md              (new - Zero-shot evaluation results)
-├── label_corrections.csv            (new - Correction log)
-├── workflow_tutorial.md             (new - Step-by-step guide)
-└── meeting_notes/
-    ├── README.md                    (new - Meeting notes index)
-    ├── 20251205-mbari-success-criteria.md      ✅ exists
-    ├── 20251215-mbari-success-criteria-2.md    ✅ exists
-    ├── 20251218-mbari-sync.md                  ✅ exists
-    ├── 20260108-mbari-sync.md                  ✅ exists
-    ├── 20260115-mbari-sync.md                  ✅ exists
-    └── 20260122-mbari-sync.md                  ✅ exists
+├── ONBOARDING.md                    ✅ exists - Project overview and demo workflow
+├── tasks.md                         ✅ exists - This file (task tracking)
+├── embeddings_analysis.md           (planned)
+├── similarity_search_examples.md    (planned)
+└── model_evaluation.md              (planned)
 ```
 
 ### Configuration Files
@@ -492,14 +454,8 @@ pre-commit run --all-files
 - GCP authentication (ADC or service account)
 - GPU compute for embeddings and model evaluation (Modal or internal)
 
-**Customer Priorities (from meeting notes)**:
+**Priority Order** (workflow sequence):
 
 1. Label review (embeddings visualization, similarity search) - Phase 2
 2. Model evaluation (precision/recall/F1, confusion matrices) - Phase 3
 3. Model training (YOLO v8, custom models) - Phase 5
-
-**GPU Compute Pricing (Modal)**:
-
-- Embeddings generation: ~$0.10-$0.50/hr
-- Zero-shot prediction: ~$0.10-$0.50/hr
-- Model training: varies by model size and epochs
