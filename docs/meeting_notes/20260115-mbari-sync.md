@@ -9,7 +9,8 @@
 
 **MBARI Participants:**
 
-- [write here]
+- Laura Chrobak
+- Danelle Cline
 
 **Meeting Notes:**
 
