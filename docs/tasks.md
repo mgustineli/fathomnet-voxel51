@@ -161,6 +161,16 @@ See [ONBOARDING.md](./ONBOARDING.md) for project overview and demo workflow.
 
 **See**: `docs/model_inference_plan.md` for detailed implementation plan.
 
+**Current Status (2026-02-05)**:
+- ✅ Storage structure created
+- ✅ Downloaded 9,210 images (25GB) - 98.9% success rate
+- ✅ Downloaded 16GB model checkpoint
+- ✅ Competition repo cloned and configured
+- ✅ All dependencies installed
+- ✅ Preprocessing complete (category mappings generated)
+- 🔄 **BLOCKED**: Dependency issue with tokenizers/transformers (see 2A.6 for fix)
+- 📋 **NEXT**: Fix dependency issue → Run inference (2-4 hours) → Import predictions to FiftyOne
+
 ### 2A.1 Planning and Setup ✅ COMPLETED
 
 - [x] Create implementation plan for PACE cluster environment
@@ -187,66 +197,84 @@ See [ONBOARDING.md](./ONBOARDING.md) for project overview and demo workflow.
 - [x] Add dependencies
   - [x] Add `aiofiles>=24.1.0` to `pyproject.toml`
 
-### 2A.3 Download Data to PACE Storage 📋 NEXT STEPS
+### 2A.3 Download Data to PACE Storage ✅ COMPLETED
 
-- [ ] Create storage directory structure:
+- [x] Create storage directory structure:
   ```bash
   mkdir -p ~/ps-dsgt_clef2026-0/shared/fathomnet-2025/train_images
   mkdir -p ~/ps-dsgt_clef2026-0/shared/fathomnet-2025/test_images
   mkdir -p ~/ps-dsgt_clef2026-0/shared/fathomnet-2025/checkpoints
   ```
 
-- [ ] Install aiofiles dependency:
+- [x] Install aiofiles dependency:
   ```bash
-  pip install aiofiles
+  uv pip install -e .  # Installs aiofiles from pyproject.toml
   ```
 
-- [ ] Test download script with small subset:
+- [x] Test download script with small subset:
   ```bash
   python -m fathomnet_voxel51.05_download_images_local \
     --output_dir ~/ps-dsgt_clef2026-0/shared/fathomnet-2025 \
-    --limit 10
+    --limit 5
   ```
+  - Result: Successfully downloaded 5 train + 5 test images
 
-- [ ] Run full image download (1-2 hours):
+- [x] Run full image download:
   ```bash
   python -m fathomnet_voxel51.05_download_images_local \
     --output_dir ~/ps-dsgt_clef2026-0/shared/fathomnet-2025
   ```
-  - Expected: 8,981 train + 325 test images (~21GB total)
-  - Time estimate: 1-2 hours (network-dependent)
+  - **Result: 8,885 train images (24GB) + 325 test images (885MB)**
+  - **Missing: 96 train images (unavailable on FathomNet servers - 404 errors)**
+  - **Success rate: 98.9% (8,885/8,981 train), 100% (325/325 test)**
+  - Total: 9,210 images (~25GB)
 
-### 2A.4 Download Model Checkpoint 📋 PENDING
+### 2A.4 Download Model Checkpoint ✅ COMPLETED
 
-**Source**: https://drive.google.com/drive/u/1/folders/1JF5B51CRUr-J_S2GoC-i5D-UmYCXClDk
+**Source**: https://drive.google.com/file/d/1dr0BQJm2G9edhJNRu9vaUCdA4lMNeeRo/view
 
-- [ ] Download 16GB checkpoint using one of these methods:
-  - [ ] **Option 1**: `gdown` (if file is publicly shared)
-  - [ ] **Option 2**: `rclone` (if configured on PACE)
-  - [ ] **Option 3**: Manual download + `scp` to PACE (most reliable)
-
-- [ ] Verify checkpoint saved to:
+- [x] Install gdown:
   ```bash
-  ~/ps-dsgt_clef2026-0/shared/fathomnet-2025/checkpoints/last-002.ckpt
+  uv pip install gdown
   ```
 
-### 2A.5 Set Up Competition Repository 📋 PENDING
+- [x] Download 16GB checkpoint using gdown:
+  ```bash
+  gdown 1dr0BQJm2G9edhJNRu9vaUCdA4lMNeeRo \
+    -O ~/ps-dsgt_clef2026-0/shared/fathomnet-2025/checkpoints/last-002.ckpt
+  ```
+  - **Result: Successfully downloaded 16GB checkpoint**
 
-- [ ] Clone competition repo:
+- [x] Verify checkpoint saved:
+  ```bash
+  ls -lh ~/ps-dsgt_clef2026-0/shared/fathomnet-2025/checkpoints/last-002.ckpt
+  # Output: -rw-r--r--. 1 mgustineli3 pace-ps-dsgt_clef2026 16G
+  ```
+
+### 2A.5 Set Up Competition Repository ✅ COMPLETED
+
+- [x] Clone competition repo:
   ```bash
   cd ~/clef
   git clone https://github.com/dhlee-work/fathomnet-cvpr2025-ssl.git
   cd fathomnet-cvpr2025-ssl
   ```
 
-- [ ] Install dependencies:
+- [x] Install dependencies:
   ```bash
-  pip install -r requirements.txt
+  source /tmp/fathomnet-venv/bin/activate
+  uv pip install -r requirements.txt
+  uv pip install fathomnet  # Additional dependency not in requirements.txt
   ```
+  - **Result: 45 packages installed in ~6 minutes (includes PyTorch + CUDA)**
 
-- [ ] Create symlinks to shared storage:
+- [x] Create directory structure and symlinks:
   ```bash
-  mkdir -p dataset/fathomnet-2025
+  # Create directories
+  mkdir -p dataset/fathomnet-2025/train_data
+  mkdir -p dataset/fathomnet-2025/test_data
+  mkdir -p logs/experiment-final014/Fold-0/
+  mkdir -p results
 
   # Link images
   ln -s ~/ps-dsgt_clef2026-0/shared/fathomnet-2025/train_images \
@@ -261,24 +289,57 @@ See [ONBOARDING.md](./ONBOARDING.md) for project overview and demo workflow.
         dataset/fathomnet-2025/dataset_test.json
 
   # Link checkpoint
-  mkdir -p logs/experiment-final014/Fold-0/
   ln -s ~/ps-dsgt_clef2026-0/shared/fathomnet-2025/checkpoints/last-002.ckpt \
         logs/experiment-final014/Fold-0/last.ckpt
   ```
+  - **Result: All symlinks created successfully**
 
-### 2A.6 Run Preprocessing and Inference 📋 PENDING
+### 2A.6 Run Preprocessing and Inference 🔄 IN PROGRESS
 
-- [ ] Run preprocessing (generates category mappings):
+- [x] Run preprocessing (generates category mappings):
   ```bash
-  python A0.data_preprocess.py
+  source /tmp/fathomnet-venv/bin/activate
+  cd ~/clef/fathomnet-cvpr2025-ssl
+  python A0.data_preprocess.py --data_path ./dataset/fathomnet-2025/dataset_train.json
   ```
+  - **Result: Successfully generated:**
+    - `results/dist_categories.csv` (30KB)
+    - `results/dist_categories_debug.csv` (30KB - copy for config)
+    - `results/hierarchical_label.csv` (1.5KB)
+    - `results/hierachical_labelencoder.pkl` (21KB)
+
+- [ ] **BLOCKED: Fix dependency issue before running inference**
+  - Issue: `ImportError: cannot import name 'Tokenizer' from 'tokenizers'`
+  - Attempted fixes:
+    - Reinstalled tokenizers (0.21.4 → 0.22.2 → 0.21.4)
+    - Issue persists across reinstalls
+  - **Next steps to try:**
+    ```bash
+    # On GPU instance:
+    source /tmp/fathomnet-venv/bin/activate
+
+    # Uninstall both packages
+    uv pip uninstall transformers tokenizers
+
+    # Reinstall with specific versions
+    uv pip install transformers==4.52.3 tokenizers==0.21.4
+
+    # Clear Python cache if needed
+    find /tmp/fathomnet-venv -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+
+    # Test import
+    python -c "from tokenizers import Tokenizer; print('Success!')"
+    ```
 
 - [ ] Run inference (2-4 hours on GPU):
   ```bash
+  cd ~/clef/fathomnet-cvpr2025-ssl
+  source /tmp/fathomnet-venv/bin/activate
   python C1.TestModel.py --config ./config/experiment-final14.yaml
   ```
-  - Output: CSV with columns `annotation_id`, `concept_name`
-  - Location: `./results/submission_{project_name}_0526_final.csv`
+  - Expected output: CSV at `./results/submission_experiment-final014_0526_final.csv`
+  - Columns: `annotation_id`, `concept_name`
+  - GPU requirement: 16GB+ VRAM
 
 ### 2A.7 Import Predictions to FiftyOne 📋 PENDING
 

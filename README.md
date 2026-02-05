@@ -146,10 +146,8 @@ FIFTYONE_API_URI="https://<your-deployment>.fiftyone.ai"
 FIFTYONE_API_KEY="<your-api-key>"
 
 # Optional: Support multiple deployments with prefixed variables
-# DEPLOYMENT1_FIFTYONE_API_URI="https://deployment1.fiftyone.ai"
-# DEPLOYMENT1_FIFTYONE_API_KEY="<api-key-1>"
-# DEPLOYMENT2_FIFTYONE_API_URI="https://deployment2.fiftyone.ai"
-# DEPLOYMENT2_FIFTYONE_API_KEY="<api-key-2>"
+# DEPLOYMENT_FIFTYONE_API_URI="https://deployment.fiftyone.ai"
+# DEPLOYMENT_FIFTYONE_API_KEY="<api-key>"
 
 # GCP Service Account (optional - only if not using ADC)
 # GOOGLE_APPLICATION_CREDENTIALS="/path/to/your/gcp_credentials.json"
