@@ -9,68 +9,136 @@ Run inference using the FathomNet 2025 competition winner model externally, then
 **External inference → CSV → FiftyOne import** (simplest path)
 
 **Competition Repo:** https://github.com/dhlee-work/fathomnet-cvpr2025-ssl
-**Checkpoint:** `~/Downloads/last-002.ckpt` (16GB)
+**Checkpoint:** 16GB model file on Google Drive: https://drive.google.com/drive/u/1/folders/1JF5B51CRUr-J_S2GoC-i5D-UmYCXClDk
+
+## Environment
+
+**Running on:** Georgia Tech PACE cluster (GPU interactive session)
+**Storage:** `~/ps-dsgt_clef2026-0/shared/fathomnet-2025/` (shared project directory)
+**Limitations:** No gsutil access (must download images directly from FathomNet URLs)
+
+**Dataset Size:**
+- Train: 8,981 images (~20GB)
+- Test: 325 images (~1GB)
+- Total: ~21GB + 16GB checkpoint = ~37GB
 
 ---
 
-## Phase 1: Set Up Competition Repo for Inference
+## Phase 1: Set Up Storage Structure
 
-### 1.1 Clone and configure the competition repo
+### 1.1 Create directory structure in shared project space
 
 ```bash
-cd ~/github
+# Create directories for images and checkpoints
+mkdir -p ~/ps-dsgt_clef2026-0/shared/fathomnet-2025/train_images
+mkdir -p ~/ps-dsgt_clef2026-0/shared/fathomnet-2025/test_images
+mkdir -p ~/ps-dsgt_clef2026-0/shared/fathomnet-2025/checkpoints
+```
+
+---
+
+## Phase 2: Download Model Checkpoint from Google Drive
+
+**Source:** https://drive.google.com/drive/u/1/folders/1JF5B51CRUr-J_S2GoC-i5D-UmYCXClDk
+
+**Options:**
+
+1. **Using gdown (if file is publicly shared):**
+   ```bash
+   pip install gdown
+   gdown --id <file_id> -O ~/ps-dsgt_clef2026-0/shared/fathomnet-2025/checkpoints/last-002.ckpt
+   ```
+
+2. **Using rclone (if configured):**
+   ```bash
+   rclone copy gdrive:/path/to/last-002.ckpt ~/ps-dsgt_clef2026-0/shared/fathomnet-2025/checkpoints/
+   ```
+
+3. **Manual transfer (most reliable):**
+   ```bash
+   # On local machine: download from Google Drive, then:
+   scp last-002.ckpt user@pace-login.pace.gatech.edu:~/ps-dsgt_clef2026-0/shared/fathomnet-2025/checkpoints/
+   ```
+
+---
+
+## Phase 3: Download Images from FathomNet URLs
+
+### 3.1 Create download script
+
+**New file:** `fathomnet_voxel51/05_download_images_local.py`
+
+Downloads images directly from FathomNet URLs (from `coco_url` field in JSON) to local storage.
+
+```bash
+# Download all images
+python -m fathomnet_voxel51.05_download_images_local \
+    --output_dir ~/ps-dsgt_clef2026-0/shared/fathomnet-2025 \
+    --train_json data/dataset_train.json \
+    --test_json data/dataset_test.json
+
+# Test with limited images first
+python -m fathomnet_voxel51.05_download_images_local \
+    --output_dir ~/ps-dsgt_clef2026-0/shared/fathomnet-2025 \
+    --limit 100
+```
+
+**Time estimate:** 1-2 hours for all 9,306 images (network-dependent)
+
+---
+
+## Phase 4: Clone and Configure Competition Repo
+
+### 4.1 Clone repo
+
+```bash
+cd ~/clef
 git clone https://github.com/dhlee-work/fathomnet-cvpr2025-ssl.git
 cd fathomnet-cvpr2025-ssl
 ```
 
-### 1.2 Install dependencies
+### 4.2 Install dependencies
 
 ```bash
 pip install -r requirements.txt
 # Key deps: pytorch-lightning, transformers, omegaconf
 ```
 
-### 1.3 Set up data structure
+### 4.3 Set up directory structure with symlinks
 
 The competition script expects:
 
 ```
 fathomnet-cvpr2025-ssl/
 ├── dataset/fathomnet-2025/
-│   ├── train_data/images/    # Download train images here
-│   ├── test_data/images/     # Download test images here
-│   └── dataset_test.json     # Symlink to our data/dataset_test.json
-├── logs/{project_name}/Fold-0/last.ckpt  # Move checkpoint here
+│   ├── train_data/images/    # Symlink to shared storage
+│   ├── test_data/images/     # Symlink to shared storage
+│   ├── dataset_train.json    # Symlink to our JSON
+│   └── dataset_test.json     # Symlink to our JSON
+├── logs/experiment-final014/Fold-0/last.ckpt  # Symlink to checkpoint
 └── results/                  # Output directory (auto-created)
 ```
 
-### 1.4 Download images from GCS
+**Create symlinks:**
 
 ```bash
-# Download from GCS to local (~24GB total)
-mkdir -p dataset/fathomnet-2025/train_data/images
-mkdir -p dataset/fathomnet-2025/test_data/images
+# Create dataset directory
+mkdir -p dataset/fathomnet-2025
 
-gsutil -m cp -r gs://voxel51-test/fathomnet/train_images/* ./dataset/fathomnet-2025/train_data/images/
-gsutil -m cp -r gs://voxel51-test/fathomnet/test_images/* ./dataset/fathomnet-2025/test_data/images/
-```
+# Symlink images from shared storage
+ln -s ~/ps-dsgt_clef2026-0/shared/fathomnet-2025/train_images dataset/fathomnet-2025/train_data/images
+ln -s ~/ps-dsgt_clef2026-0/shared/fathomnet-2025/test_images dataset/fathomnet-2025/test_data/images
 
-### 1.5 Link annotation files
+# Symlink annotation JSON files
+ln -s ~/clef/fathomnet-voxel51/data/dataset_train.json dataset/fathomnet-2025/dataset_train.json
+ln -s ~/clef/fathomnet-voxel51/data/dataset_test.json dataset/fathomnet-2025/dataset_test.json
 
-```bash
-# Link our COCO JSON files
-ln -s /Users/mgustineli/github/fathomnet-voxel51/data/dataset_train.json ./dataset/fathomnet-2025/dataset_train.json
-ln -s /Users/mgustineli/github/fathomnet-voxel51/data/dataset_test.json ./dataset/fathomnet-2025/dataset_test.json
-```
-
-### 1.6 Move checkpoint to expected location
-
-```bash
+# Symlink checkpoint
 mkdir -p logs/experiment-final014/Fold-0/
-cp ~/Downloads/last-002.ckpt logs/experiment-final014/Fold-0/last.ckpt
+ln -s ~/ps-dsgt_clef2026-0/shared/fathomnet-2025/checkpoints/last-002.ckpt logs/experiment-final014/Fold-0/last.ckpt
 ```
 
-### 1.7 Run preprocessing (generates category mappings)
+### 4.4 Run preprocessing (generates category mappings)
 
 ```bash
 python A0.data_preprocess.py
@@ -79,7 +147,7 @@ python A0.data_preprocess.py
 
 ---
 
-## Phase 2: Run Inference
+## Phase 5: Run Inference
 
 ### 2.1 Modify C1.TestModel.py for training set predictions (optional)
 
@@ -104,7 +172,7 @@ Creates CSV at `./results/submission_{project_name}_0526_final.csv` with columns
 
 ---
 
-## Phase 3: Import Predictions into FiftyOne
+## Phase 6: Import Predictions into FiftyOne
 
 ### 3.1 Create import script
 
@@ -186,7 +254,7 @@ if __name__ == "__main__":
 
 ---
 
-## Phase 4: Verification & Model Evaluation
+## Phase 7: Verification & Model Evaluation
 
 ### 4.1 Verify import
 
@@ -224,22 +292,36 @@ plot.show()
 
 ## Summary
 
-| Phase | Action                       | Time Estimate        |
-| ----- | ---------------------------- | -------------------- |
-| 1     | Setup repo + download images | 30-60 min (download) |
-| 2     | Run inference                | 2-4 hours (GPU)      |
-| 3     | Import to FiftyOne           | 5-10 min             |
-| 4     | Evaluation                   | 10-15 min            |
+### Time Estimates (PACE Cluster)
+
+| Phase | Action                              | Size/Count       | Time Estimate        |
+| ----- | ----------------------------------- | ---------------- | -------------------- |
+| 1     | Create directory structure          | -                | 1 min                |
+| 2     | Download checkpoint from GDrive     | 16GB             | 30-60 min            |
+| 3     | Download images from FathomNet URLs | 9,306 images     | 1-2 hours            |
+| 4     | Clone repo + install deps           | -                | 10-15 min            |
+| 5     | Run inference                       | -                | 2-4 hours (GPU)      |
+| 6     | Import to FiftyOne                  | -                | 5-10 min             |
+| 7     | Evaluation                          | -                | 10-15 min            |
+| **TOTAL** | **Setup + Inference**           | **~37GB total**  | **4-8 hours**        |
+
+### Key Bottlenecks
+
+1. **Checkpoint download** (16GB from Google Drive) - 30-60 min
+2. **Image download** (9,306 images from FathomNet) - 1-2 hours
+3. **GPU inference** - 2-4 hours
 
 ## Key Files
 
-| File                                         | Purpose                       |
-| -------------------------------------------- | ----------------------------- |
-| Competition's `C1.TestModel.py`              | Runs inference, generates CSV |
-| `fathomnet_voxel51/04_import_predictions.py` | Imports CSV to FiftyOne       |
+| File                                          | Purpose                              |
+| --------------------------------------------- | ------------------------------------ |
+| `fathomnet_voxel51/05_download_images_local.py` | Downloads images from FathomNet URLs |
+| Competition's `C1.TestModel.py`               | Runs inference, generates CSV        |
+| `fathomnet_voxel51/04_import_predictions.py`  | Imports CSV to FiftyOne              |
 
 ## Requirements
 
-- ~24GB disk space for images
-- GPU with 16GB+ VRAM (for DINOv2-large model)
-- GCS access for image download
+- **Storage:** ~37GB total (21GB images + 16GB checkpoint)
+- **Location:** PACE cluster shared storage (`~/ps-dsgt_clef2026-0/shared/`)
+- **GPU:** 16GB+ VRAM (for DINOv2-large model)
+- **Network:** Stable connection for downloading checkpoint and images

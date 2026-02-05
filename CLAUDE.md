@@ -13,7 +13,7 @@ This project uses FiftyOne Enterprise (v2.14.1) which requires authentication to
 **Option 1: Add to shell profile (recommended - permanent setup):**
 
 ```bash
-echo 'export UV_EXTRA_INDEX_URL="https://8c7d1077ed792efe@pypi.fiftyone.ai"' >> ~/.zshrc
+echo 'export UV_EXTRA_INDEX_URL="https://<your-fiftyone-pypi-token>@pypi.fiftyone.ai"' >> ~/.zshrc
 source ~/.zshrc
 ```
 

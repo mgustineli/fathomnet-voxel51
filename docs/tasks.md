@@ -1,7 +1,7 @@
 # Tasks: FathomNet 2025 @ FiftyOne Enterprise
 
-**Current Phase**: Phase 2 - Data Exploration (90% Complete)
-**Last Updated**: 2026-02-04
+**Current Phase**: Phase 2A - Model Inference Preparation (In Progress)
+**Last Updated**: 2026-02-05
 
 See [ONBOARDING.md](./ONBOARDING.md) for project overview and demo workflow.
 
@@ -150,6 +150,154 @@ See [ONBOARDING.md](./ONBOARDING.md) for project overview and demo workflow.
 - [x] Useful for finding duplicates and near-duplicates
 
 **Phase 2 Status:** Core functionality complete and ready for demo.
+
+---
+
+## Phase 2A: Model Inference Preparation (PACE Cluster) 🔄 IN PROGRESS
+
+**Goal**: Prepare to run FathomNet 2025 competition winner model inference on PACE cluster for model evaluation in FiftyOne.
+
+**Context**: Running on Georgia Tech PACE cluster GPU interactive session. No gsutil access available. Need to download images directly from FathomNet URLs and model checkpoints from Google Drive.
+
+**See**: `docs/model_inference_plan.md` for detailed implementation plan.
+
+### 2A.1 Planning and Setup ✅ COMPLETED
+
+- [x] Create implementation plan for PACE cluster environment
+  - [x] Document environment constraints (no gsutil, shared storage)
+  - [x] Plan data download strategy (FathomNet URLs → local storage)
+  - [x] Plan checkpoint download (Google Drive → shared storage)
+  - [x] Create `docs/model_inference_plan.md` with 7-phase plan
+
+- [x] Update plan for PACE cluster specifics
+  - [x] Storage location: `~/ps-dsgt_clef2026-0/shared/fathomnet-2025/`
+  - [x] Dataset size: 8,981 train + 325 test images (~21GB)
+  - [x] Checkpoint size: 16GB from Google Drive
+  - [x] Total storage needed: ~37GB
+
+### 2A.2 Create Download Infrastructure ✅ COMPLETED
+
+- [x] Create `fathomnet_voxel51/05_download_images_local.py`
+  - [x] Async download from FathomNet URLs (from `coco_url` field)
+  - [x] Save to local filesystem instead of GCS
+  - [x] Resume capability (skip existing files)
+  - [x] Progress tracking with tqdm
+  - [x] Configurable concurrency (default: 50)
+
+- [x] Add dependencies
+  - [x] Add `aiofiles>=24.1.0` to `pyproject.toml`
+
+### 2A.3 Download Data to PACE Storage 📋 NEXT STEPS
+
+- [ ] Create storage directory structure:
+  ```bash
+  mkdir -p ~/ps-dsgt_clef2026-0/shared/fathomnet-2025/train_images
+  mkdir -p ~/ps-dsgt_clef2026-0/shared/fathomnet-2025/test_images
+  mkdir -p ~/ps-dsgt_clef2026-0/shared/fathomnet-2025/checkpoints
+  ```
+
+- [ ] Install aiofiles dependency:
+  ```bash
+  pip install aiofiles
+  ```
+
+- [ ] Test download script with small subset:
+  ```bash
+  python -m fathomnet_voxel51.05_download_images_local \
+    --output_dir ~/ps-dsgt_clef2026-0/shared/fathomnet-2025 \
+    --limit 10
+  ```
+
+- [ ] Run full image download (1-2 hours):
+  ```bash
+  python -m fathomnet_voxel51.05_download_images_local \
+    --output_dir ~/ps-dsgt_clef2026-0/shared/fathomnet-2025
+  ```
+  - Expected: 8,981 train + 325 test images (~21GB total)
+  - Time estimate: 1-2 hours (network-dependent)
+
+### 2A.4 Download Model Checkpoint 📋 PENDING
+
+**Source**: https://drive.google.com/drive/u/1/folders/1JF5B51CRUr-J_S2GoC-i5D-UmYCXClDk
+
+- [ ] Download 16GB checkpoint using one of these methods:
+  - [ ] **Option 1**: `gdown` (if file is publicly shared)
+  - [ ] **Option 2**: `rclone` (if configured on PACE)
+  - [ ] **Option 3**: Manual download + `scp` to PACE (most reliable)
+
+- [ ] Verify checkpoint saved to:
+  ```bash
+  ~/ps-dsgt_clef2026-0/shared/fathomnet-2025/checkpoints/last-002.ckpt
+  ```
+
+### 2A.5 Set Up Competition Repository 📋 PENDING
+
+- [ ] Clone competition repo:
+  ```bash
+  cd ~/clef
+  git clone https://github.com/dhlee-work/fathomnet-cvpr2025-ssl.git
+  cd fathomnet-cvpr2025-ssl
+  ```
+
+- [ ] Install dependencies:
+  ```bash
+  pip install -r requirements.txt
+  ```
+
+- [ ] Create symlinks to shared storage:
+  ```bash
+  mkdir -p dataset/fathomnet-2025
+
+  # Link images
+  ln -s ~/ps-dsgt_clef2026-0/shared/fathomnet-2025/train_images \
+        dataset/fathomnet-2025/train_data/images
+  ln -s ~/ps-dsgt_clef2026-0/shared/fathomnet-2025/test_images \
+        dataset/fathomnet-2025/test_data/images
+
+  # Link JSON annotations
+  ln -s ~/clef/fathomnet-voxel51/data/dataset_train.json \
+        dataset/fathomnet-2025/dataset_train.json
+  ln -s ~/clef/fathomnet-voxel51/data/dataset_test.json \
+        dataset/fathomnet-2025/dataset_test.json
+
+  # Link checkpoint
+  mkdir -p logs/experiment-final014/Fold-0/
+  ln -s ~/ps-dsgt_clef2026-0/shared/fathomnet-2025/checkpoints/last-002.ckpt \
+        logs/experiment-final014/Fold-0/last.ckpt
+  ```
+
+### 2A.6 Run Preprocessing and Inference 📋 PENDING
+
+- [ ] Run preprocessing (generates category mappings):
+  ```bash
+  python A0.data_preprocess.py
+  ```
+
+- [ ] Run inference (2-4 hours on GPU):
+  ```bash
+  python C1.TestModel.py --config ./config/experiment-final14.yaml
+  ```
+  - Output: CSV with columns `annotation_id`, `concept_name`
+  - Location: `./results/submission_{project_name}_0526_final.csv`
+
+### 2A.7 Import Predictions to FiftyOne 📋 PENDING
+
+- [ ] Create import script: `fathomnet_voxel51/04_import_predictions.py` (see plan)
+- [ ] Run import:
+  ```bash
+  python -m fathomnet_voxel51.04_import_predictions \
+    <path-to-predictions.csv> \
+    --dataset_name fathomnet-2025 \
+    --field model_predictions
+  ```
+- [ ] Verify predictions imported to FiftyOne dataset
+
+**Implementation Notes:**
+- Running on PACE cluster GPU node (not local machine)
+- Using shared project storage for data persistence
+- Total setup time estimate: 2-3 hours (downloads)
+- Total inference time estimate: 2-4 hours (GPU)
+- See `docs/model_inference_plan.md` for complete workflow
 
 ---
 
@@ -332,6 +480,8 @@ fathomnet_voxel51/
 ├── 01_upload_to_gcs.py             ✅ exists - Async image uploader (URLs → GCS)
 ├── 02_ingest_dataset.py            ✅ exists - FiftyOne dataset ingestion
 ├── 03_add_primary_label.py         ✅ exists - Label aggregation for visualization
+├── 04_import_predictions.py        📋 planned - Import model predictions CSV to FiftyOne
+├── 05_download_images_local.py     ✅ exists - Download images from URLs to local storage (PACE)
 └── debug_labels.py                 ✅ exists - Dataset debugging utility
 ```
 
@@ -341,9 +491,10 @@ fathomnet_voxel51/
 docs/
 ├── ONBOARDING.md                    ✅ exists - Project overview and demo workflow
 ├── tasks.md                         ✅ exists - This file (task tracking)
-├── embeddings_analysis.md           (planned)
-├── similarity_search_examples.md    (planned)
-└── model_evaluation.md              (planned)
+├── model_inference_plan.md          ✅ exists - Competition model inference plan (PACE cluster)
+├── embeddings_analysis.md           📋 planned
+├── similarity_search_examples.md    📋 planned
+└── model_evaluation.md              📋 planned
 ```
 
 ### Configuration Files

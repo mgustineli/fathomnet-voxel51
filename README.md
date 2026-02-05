@@ -96,15 +96,20 @@ This project uses **FiftyOne Enterprise v2.14.1**, which requires authentication
 
 ```bash
 # Add to ~/.zshrc (or ~/.bashrc if using bash)
-echo 'export UV_EXTRA_INDEX_URL="https://8c7d1077ed792efe@pypi.fiftyone.ai"' >> ~/.zshrc
+echo 'export UV_EXTRA_INDEX_URL="https://<your-fiftyone-pypi-token>@pypi.fiftyone.ai"' >> ~/.zshrc
 source ~/.zshrc
 ```
 
+> _Note: Replace `<your-fiftyone-pypi-token>` with the token provided by Voxel51._
+
 This one-time setup allows `uv pip install` to automatically authenticate with the FiftyOne PyPI repository.
 
-**Alternative:** If you prefer not to modify your shell profile, the PyPI URL is also stored in `.env` and can be loaded per-session:
+**Alternative:** If you prefer not to modify your shell profile, add the PyPI URL to your `.env` file and load it per-session:
 
 ```bash
+# In .env file:
+# UV_EXTRA_INDEX_URL="https://<your-token>@pypi.fiftyone.ai"
+
 export $(grep UV_EXTRA_INDEX_URL .env | xargs)
 ```
 
@@ -136,18 +141,21 @@ You will need the following credentials set in your environment. The project use
 2.  Add the following variables to it:
 
 ```env
-# FiftyOne Enterprise (supports multiple deployments)
-MURILO_FIFTYONE_API_URI="https://murilo.dev.fiftyone.ai"
-MURILO_FIFTYONE_API_KEY="<your-api-key>"
+# FiftyOne Enterprise
+FIFTYONE_API_URI="https://<your-deployment>.fiftyone.ai"
+FIFTYONE_API_KEY="<your-api-key>"
 
-PRERNA_FIFTYONE_API_URI="https://prerna.dev.fiftyone.ai"
-PRERNA_FIFTYONE_API_KEY="<your-api-key>"
+# Optional: Support multiple deployments with prefixed variables
+# DEPLOYMENT1_FIFTYONE_API_URI="https://deployment1.fiftyone.ai"
+# DEPLOYMENT1_FIFTYONE_API_KEY="<api-key-1>"
+# DEPLOYMENT2_FIFTYONE_API_URI="https://deployment2.fiftyone.ai"
+# DEPLOYMENT2_FIFTYONE_API_KEY="<api-key-2>"
 
 # GCP Service Account (optional - only if not using ADC)
 # GOOGLE_APPLICATION_CREDENTIALS="/path/to/your/gcp_credentials.json"
 ```
 
-> _Note: Scripts default to the Murilo deployment. Use `--deployment prerna` to switch deployments._
+> _Note: Scripts use the default `FIFTYONE_API_URI` and `FIFTYONE_API_KEY`. For multiple deployments, use prefixed variables and the `--deployment` flag._
 
 #### GCP Authentication Options
 
@@ -183,11 +191,11 @@ python -m fathomnet_voxel51.01_upload_to_gcs --limit 100
 Create the FiftyOne dataset with both train and test splits. This step only needs to be run **once** - the dataset persists in FiftyOne Enterprise.
 
 ```bash
-# Ingest full dataset using Murilo deployment (default)
+# Ingest full dataset (uses default FIFTYONE_API_URI from .env)
 python -m fathomnet_voxel51.02_ingest_dataset
 
-# Use Prerna deployment
-python -m fathomnet_voxel51.02_ingest_dataset --deployment prerna
+# Use a specific deployment (if you have multiple configured)
+python -m fathomnet_voxel51.02_ingest_dataset --deployment <deployment-name>
 
 # Test with a subset first (optional)
 python -m fathomnet_voxel51.02_ingest_dataset --limit 10
