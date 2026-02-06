@@ -23,6 +23,7 @@ dependencies = [
     "gcloud-aio-storage>=9.0.0",
     "aiohttp>=3.13.3",
     "aiofiles>=24.1.0",
+    "scikit-learn>=1.5.0",
     "fiftyone==2.14.1",
 ]
 
