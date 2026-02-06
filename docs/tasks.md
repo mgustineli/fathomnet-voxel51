@@ -1,6 +1,6 @@
 # Tasks: FathomNet 2025 @ FiftyOne Enterprise
 
-**Current Phase**: Phase 2A - Model Inference Preparation (In Progress)
+**Current Phase**: Phase 2A.7 - Import Predictions to FiftyOne (Next Up)
 **Last Updated**: 2026-02-05
 
 See [ONBOARDING.md](./ONBOARDING.md) for project overview and demo workflow.
@@ -153,23 +153,21 @@ See [ONBOARDING.md](./ONBOARDING.md) for project overview and demo workflow.
 
 ---
 
-## Phase 2A: Model Inference Preparation (PACE Cluster) 🔄 IN PROGRESS
+## Phase 2A: Model Inference (PACE Cluster) ✅ 95% COMPLETED
 
-**Goal**: Prepare to run FathomNet 2025 competition winner model inference on PACE cluster for model evaluation in FiftyOne.
+**Goal**: Run FathomNet 2025 competition winner model inference on PACE cluster for model evaluation in FiftyOne.
 
-**Context**: Running on Georgia Tech PACE cluster GPU interactive session. No gsutil access available. Need to download images directly from FathomNet URLs and model checkpoints from Google Drive.
+**Context**: Running on Georgia Tech PACE cluster GPU nodes via SLURM. Images and checkpoint stored in shared project storage. Inference pipeline lives in `inference/` directory.
 
 **See**: `docs/model_inference_plan.md` for detailed implementation plan.
 
 **Current Status (2026-02-05)**:
-- ✅ Storage structure created
-- ✅ Downloaded 9,210 images (25GB) - 98.9% success rate
-- ✅ Downloaded 16GB model checkpoint
-- ✅ Competition repo cloned and configured
-- ✅ All dependencies installed
-- ✅ Preprocessing complete (category mappings generated)
-- 🔄 **BLOCKED**: Dependency issue with tokenizers/transformers (see 2A.6 for fix)
-- 📋 **NEXT**: Fix dependency issue → Run inference (2-4 hours) → Import predictions to FiftyOne
+- ✅ All data downloaded (9,210 images + 16GB checkpoint)
+- ✅ Inference pipeline created (`inference/` directory with pyproject.toml, run_inference.py, sbatch scripts)
+- ✅ Tokenizers/transformers dependency issue resolved (UV_LINK_MODE=copy + --no-cache)
+- ✅ Inference completed successfully: **788 predictions, ~1.5 min on RTX 6000**
+- ✅ Results saved: `inference/results/submission_experiment-final014.csv`
+- 📋 **NEXT**: Import predictions to FiftyOne Enterprise (Task 2A.7)
 
 ### 2A.1 Planning and Setup ✅ COMPLETED
 
@@ -294,71 +292,74 @@ See [ONBOARDING.md](./ONBOARDING.md) for project overview and demo workflow.
   ```
   - **Result: All symlinks created successfully**
 
-### 2A.6 Run Preprocessing and Inference 🔄 IN PROGRESS
+### 2A.6 Create Inference Pipeline and Run Inference ✅ COMPLETED
 
-- [x] Run preprocessing (generates category mappings):
-  ```bash
-  source /tmp/fathomnet-venv/bin/activate
-  cd ~/clef/fathomnet-cvpr2025-ssl
-  python A0.data_preprocess.py --data_path ./dataset/fathomnet-2025/dataset_train.json
+- [x] Created inference pipeline (`inference/` directory):
+  - [x] `inference/run_inference.py` - Main inference script wrapping competition code
+    - Clones competition repo, applies patches (UUID filename fix, checkpoint path fix)
+    - Configurable paths via CLI args (data, annotations, checkpoint, output)
+    - Credits original repo: `dhlee-work/fathomnet-cvpr2025-ssl`
+  - [x] `inference/pyproject.toml` - Dependencies for uv (PyTorch installed separately with CUDA)
+  - [x] `inference/sbatch/_job.sh` - SLURM job script (follows birdclef-2026 pattern)
+    - Per-job venv in `$TMPDIR`, `UV_LINK_MODE=copy`, PyTorch CUDA from cu121 index
+    - Tokenizers workaround: `--reinstall --no-cache` to avoid corrupted cache
+    - Import verification step before running inference
+  - [x] `inference/sbatch/run.sh` - Launcher with `--dry-run` support
+
+- [x] Resolved tokenizers dependency issue:
+  - **Root cause**: `UV_LINK_MODE` hardlink failure on PACE cluster (cross-filesystem storage)
+  - **Symptoms**: `ImportError: cannot import name 'Tokenizer' from 'tokenizers' (unknown location)` - package directory exists but `.so` files are empty
+  - **Fix**: `export UV_LINK_MODE=copy` globally + `uv pip install --reinstall --no-cache tokenizers==0.21.4`
+
+- [x] Resolved additional issues discovered during testing:
+  - Missing `torchvision` dependency (not in competition requirements.txt)
+  - Hardcoded checkpoint path: `~/Project/cvprcom/logs/` → `./logs/`
+  - Image filename mismatch: numeric IDs (`1.png`) vs UUID filenames (`000b8e39-...png`)
+
+- [x] Copied preprocessing artifacts to shared storage:
   ```
-  - **Result: Successfully generated:**
-    - `results/dist_categories.csv` (30KB)
-    - `results/dist_categories_debug.csv` (30KB - copy for config)
-    - `results/hierarchical_label.csv` (1.5KB)
-    - `results/hierachical_labelencoder.pkl` (21KB)
-
-- [ ] **BLOCKED: Fix dependency issue before running inference**
-  - Issue: `ImportError: cannot import name 'Tokenizer' from 'tokenizers'`
-  - Attempted fixes:
-    - Reinstalled tokenizers (0.21.4 → 0.22.2 → 0.21.4)
-    - Issue persists across reinstalls
-  - **Next steps to try:**
-    ```bash
-    # On GPU instance:
-    source /tmp/fathomnet-venv/bin/activate
-
-    # Uninstall both packages
-    uv pip uninstall transformers tokenizers
-
-    # Reinstall with specific versions
-    uv pip install transformers==4.52.3 tokenizers==0.21.4
-
-    # Clear Python cache if needed
-    find /tmp/fathomnet-venv -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
-
-    # Test import
-    python -c "from tokenizers import Tokenizer; print('Success!')"
-    ```
-
-- [ ] Run inference (2-4 hours on GPU):
-  ```bash
-  cd ~/clef/fathomnet-cvpr2025-ssl
-  source /tmp/fathomnet-venv/bin/activate
-  python C1.TestModel.py --config ./config/experiment-final14.yaml
+  ~/ps-dsgt_clef2026-0/shared/fathomnet-2025/preprocessing/
+  ├── dist_categories.csv
+  ├── dist_categories_debug.csv
+  ├── hierarchical_label.csv
+  └── hierachical_labelencoder.pkl
   ```
-  - Expected output: CSV at `./results/submission_experiment-final014_0526_final.csv`
-  - Columns: `annotation_id`, `concept_name`
-  - GPU requirement: 16GB+ VRAM
 
-### 2A.7 Import Predictions to FiftyOne 📋 PENDING
+- [x] Run inference on PACE cluster:
+  ```bash
+  cd inference
+  bash sbatch/run.sh
+  ```
+  - **Result: 788 predictions in ~1.5 min inference time (3:48 total wall time)**
+  - GPU: RTX 6000, 8 CPUs, 64GB RAM
+  - Output: `inference/results/submission_experiment-final014.csv`
+  - Columns: `annotation_id`, `concept_name` (79 categories)
 
-- [ ] Create import script: `fathomnet_voxel51/04_import_predictions.py` (see plan)
-- [ ] Run import:
+### 2A.7 Import Predictions to FiftyOne 📋 NEXT UP
+
+- [x] Import script already exists: `fathomnet_voxel51/04_import_predictions.py`
+- [ ] Run import (requires FiftyOne Enterprise access - local machine or login node with `.env`):
   ```bash
   python -m fathomnet_voxel51.04_import_predictions \
-    <path-to-predictions.csv> \
-    --dataset_name fathomnet-2025 \
+    inference/results/submission_experiment-final014.csv \
+    --dataset fathomnet-2025 \
     --field model_predictions
   ```
-- [ ] Verify predictions imported to FiftyOne dataset
+- [ ] Verify in FiftyOne App:
+  - [ ] `model_predictions` field appears in dataset schema
+  - [ ] 788 predictions matched to test set annotations
+  - [ ] Predictions visible as overlays alongside `ground_truth`
+
+**How it works:**
+- CSV has `annotation_id` + `concept_name` (predicted species)
+- Script matches each prediction to a ground truth detection by `annotation_id`
+- Creates a parallel `model_predictions` Detections field with same bounding boxes but model's labels
+- Enables visual comparison and `dataset.evaluate_detections()` for precision/recall/F1
 
 **Implementation Notes:**
-- Running on PACE cluster GPU node (not local machine)
-- Using shared project storage for data persistence
-- Total setup time estimate: 2-3 hours (downloads)
-- Total inference time estimate: 2-4 hours (GPU)
-- See `docs/model_inference_plan.md` for complete workflow
+- Inference pipeline: `inference/` directory (run_inference.py + sbatch scripts)
+- Actual inference time: ~1.5 min on RTX 6000 (~3:48 total including setup)
+- Preprocessing artifacts stored in shared PACE storage for reproducibility
 
 ---
 
@@ -544,6 +545,19 @@ fathomnet_voxel51/
 ├── 04_import_predictions.py        📋 planned - Import model predictions CSV to FiftyOne
 ├── 05_download_images_local.py     ✅ exists - Download images from URLs to local storage (PACE)
 └── debug_labels.py                 ✅ exists - Dataset debugging utility
+```
+
+### Inference Pipeline
+
+```
+inference/
+├── pyproject.toml                   ✅ exists - Dependencies for uv (PyTorch installed separately)
+├── run_inference.py                 ✅ exists - Main inference script (wraps competition code)
+├── results/
+│   └── submission_experiment-final014.csv  ✅ exists - 788 predictions on test set
+└── sbatch/
+    ├── _job.sh                      ✅ exists - SLURM job script (RTX 6000, 4hr, 64GB)
+    └── run.sh                       ✅ exists - Launcher with --dry-run support
 ```
 
 ### Documentation Files
