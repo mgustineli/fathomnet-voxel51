@@ -21,11 +21,11 @@ This repo contains the workflow and analysis for the [FathomNet 2025 dataset](ht
 │   ├── 04_download_images_local.py   # Download images to local storage (PACE cluster)
 │   ├── 05_import_predictions.py      # Import model predictions CSV into FiftyOne
 │   └── debug_labels.py               # Dataset label debugging utility
-├── inference/                         # Model inference pipeline (PACE cluster)
-│   ├── run_inference.py               # Main inference script (wraps competition code)
-│   ├── pyproject.toml                 # Inference dependencies (PyTorch, etc.)
-│   ├── results/                       # Model prediction outputs (CSV)
-│   └── sbatch/                        # SLURM job scripts for PACE cluster
+├── inference/                        # Model inference pipeline (PACE cluster)
+│   ├── run_inference.py              # Main inference script (wraps competition code)
+│   ├── pyproject.toml                # Inference dependencies (PyTorch, etc.)
+│   ├── results/                      # Model prediction outputs (CSV)
+│   └── sbatch/                       # SLURM job scripts for PACE cluster
 ├── notebooks/                        # Jupyter notebooks for exploration and analysis
 │   ├── 00_fathomnet-eda.ipynb        # Initial EDA and data exploration
 │   ├── 01_upload_to_gcs.ipynb        # Example notebook for uploading data to GCS
