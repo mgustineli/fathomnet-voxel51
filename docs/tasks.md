@@ -1,7 +1,7 @@
 # Tasks: FathomNet 2025 @ FiftyOne Enterprise
 
-**Current Phase**: Phase 2A.7 - Import Predictions to FiftyOne (Next Up)
-**Last Updated**: 2026-02-05
+**Current Phase**: Phase 3 - Model Evaluation (Next Up)
+**Last Updated**: 2026-02-06
 
 See [ONBOARDING.md](./ONBOARDING.md) for project overview and demo workflow.
 
@@ -84,7 +84,7 @@ See [ONBOARDING.md](./ONBOARDING.md) for project overview and demo workflow.
 
 ---
 
-## Phase 2: Data Exploration ✅ 90% COMPLETED
+## Phase 2: Data Exploration ✅ COMPLETED
 
 **Goal**: Use FiftyOne to explore dataset, visualize embeddings, and perform similarity search.
 
@@ -153,7 +153,7 @@ See [ONBOARDING.md](./ONBOARDING.md) for project overview and demo workflow.
 
 ---
 
-## Phase 2A: Model Inference (PACE Cluster) ✅ 95% COMPLETED
+## Phase 2A: Model Inference (PACE Cluster) ✅ COMPLETED
 
 **Goal**: Run FathomNet 2025 competition winner model inference on PACE cluster for model evaluation in FiftyOne.
 
@@ -161,13 +161,14 @@ See [ONBOARDING.md](./ONBOARDING.md) for project overview and demo workflow.
 
 **See**: `docs/model_inference_plan.md` for detailed implementation plan.
 
-**Current Status (2026-02-05)**:
+**Final Status (2026-02-06)**:
+
 - ✅ All data downloaded (9,210 images + 16GB checkpoint)
 - ✅ Inference pipeline created (`inference/` directory with pyproject.toml, run_inference.py, sbatch scripts)
 - ✅ Tokenizers/transformers dependency issue resolved (UV_LINK_MODE=copy + --no-cache)
 - ✅ Inference completed successfully: **788 predictions, ~1.5 min on RTX 6000**
 - ✅ Results saved: `inference/results/submission_experiment-final014.csv`
-- 📋 **NEXT**: Import predictions to FiftyOne Enterprise (Task 2A.7)
+- ✅ Predictions imported to FiftyOne Enterprise as `model_predictions` field on test samples
 
 ### 2A.1 Planning and Setup ✅ COMPLETED
 
@@ -185,7 +186,7 @@ See [ONBOARDING.md](./ONBOARDING.md) for project overview and demo workflow.
 
 ### 2A.2 Create Download Infrastructure ✅ COMPLETED
 
-- [x] Create `fathomnet_voxel51/05_download_images_local.py`
+- [x] Create `fathomnet_voxel51/04_download_images_local.py`
   - [x] Async download from FathomNet URLs (from `coco_url` field)
   - [x] Save to local filesystem instead of GCS
   - [x] Resume capability (skip existing files)
@@ -198,6 +199,7 @@ See [ONBOARDING.md](./ONBOARDING.md) for project overview and demo workflow.
 ### 2A.3 Download Data to PACE Storage ✅ COMPLETED
 
 - [x] Create storage directory structure:
+
   ```bash
   mkdir -p ~/ps-dsgt_clef2026-0/shared/fathomnet-2025/train_images
   mkdir -p ~/ps-dsgt_clef2026-0/shared/fathomnet-2025/test_images
@@ -205,23 +207,28 @@ See [ONBOARDING.md](./ONBOARDING.md) for project overview and demo workflow.
   ```
 
 - [x] Install aiofiles dependency:
+
   ```bash
   uv pip install -e .  # Installs aiofiles from pyproject.toml
   ```
 
 - [x] Test download script with small subset:
+
   ```bash
-  python -m fathomnet_voxel51.05_download_images_local \
+  python -m fathomnet_voxel51.04_download_images_local \
     --output_dir ~/ps-dsgt_clef2026-0/shared/fathomnet-2025 \
     --limit 5
   ```
+
   - Result: Successfully downloaded 5 train + 5 test images
 
 - [x] Run full image download:
+
   ```bash
-  python -m fathomnet_voxel51.05_download_images_local \
+  python -m fathomnet_voxel51.04_download_images_local \
     --output_dir ~/ps-dsgt_clef2026-0/shared/fathomnet-2025
   ```
+
   - **Result: 8,885 train images (24GB) + 325 test images (885MB)**
   - **Missing: 96 train images (unavailable on FathomNet servers - 404 errors)**
   - **Success rate: 98.9% (8,885/8,981 train), 100% (325/325 test)**
@@ -232,15 +239,18 @@ See [ONBOARDING.md](./ONBOARDING.md) for project overview and demo workflow.
 **Source**: https://drive.google.com/file/d/1dr0BQJm2G9edhJNRu9vaUCdA4lMNeeRo/view
 
 - [x] Install gdown:
+
   ```bash
   uv pip install gdown
   ```
 
 - [x] Download 16GB checkpoint using gdown:
+
   ```bash
   gdown 1dr0BQJm2G9edhJNRu9vaUCdA4lMNeeRo \
     -O ~/ps-dsgt_clef2026-0/shared/fathomnet-2025/checkpoints/last-002.ckpt
   ```
+
   - **Result: Successfully downloaded 16GB checkpoint**
 
 - [x] Verify checkpoint saved:
@@ -252,6 +262,7 @@ See [ONBOARDING.md](./ONBOARDING.md) for project overview and demo workflow.
 ### 2A.5 Set Up Competition Repository ✅ COMPLETED
 
 - [x] Clone competition repo:
+
   ```bash
   cd ~/clef
   git clone https://github.com/dhlee-work/fathomnet-cvpr2025-ssl.git
@@ -259,14 +270,17 @@ See [ONBOARDING.md](./ONBOARDING.md) for project overview and demo workflow.
   ```
 
 - [x] Install dependencies:
+
   ```bash
   source /tmp/fathomnet-venv/bin/activate
   uv pip install -r requirements.txt
   uv pip install fathomnet  # Additional dependency not in requirements.txt
   ```
+
   - **Result: 45 packages installed in ~6 minutes (includes PyTorch + CUDA)**
 
 - [x] Create directory structure and symlinks:
+
   ```bash
   # Create directories
   mkdir -p dataset/fathomnet-2025/train_data
@@ -290,6 +304,7 @@ See [ONBOARDING.md](./ONBOARDING.md) for project overview and demo workflow.
   ln -s ~/ps-dsgt_clef2026-0/shared/fathomnet-2025/checkpoints/last-002.ckpt \
         logs/experiment-final014/Fold-0/last.ckpt
   ```
+
   - **Result: All symlinks created successfully**
 
 ### 2A.6 Create Inference Pipeline and Run Inference ✅ COMPLETED
@@ -317,6 +332,7 @@ See [ONBOARDING.md](./ONBOARDING.md) for project overview and demo workflow.
   - Image filename mismatch: numeric IDs (`1.png`) vs UUID filenames (`000b8e39-...png`)
 
 - [x] Copied preprocessing artifacts to shared storage:
+
   ```
   ~/ps-dsgt_clef2026-0/shared/fathomnet-2025/preprocessing/
   ├── dist_categories.csv
@@ -326,90 +342,83 @@ See [ONBOARDING.md](./ONBOARDING.md) for project overview and demo workflow.
   ```
 
 - [x] Run inference on PACE cluster:
+
   ```bash
   cd inference
   bash sbatch/run.sh
   ```
+
   - **Result: 788 predictions in ~1.5 min inference time (3:48 total wall time)**
   - GPU: RTX 6000, 8 CPUs, 64GB RAM
   - Output: `inference/results/submission_experiment-final014.csv`
   - Columns: `annotation_id`, `concept_name` (79 categories)
 
-### 2A.7 Import Predictions to FiftyOne 📋 NEXT UP
+### 2A.7 Import Predictions to FiftyOne ✅ COMPLETED
 
-- [x] Import script already exists: `fathomnet_voxel51/04_import_predictions.py`
-- [ ] Run import (requires FiftyOne Enterprise access - local machine or login node with `.env`):
+- [x] Import script: `fathomnet_voxel51/05_import_predictions.py`
+- [x] Run import:
   ```bash
-  python -m fathomnet_voxel51.04_import_predictions \
+  python -m fathomnet_voxel51.05_import_predictions \
     inference/results/submission_experiment-final014.csv \
     --dataset fathomnet-2025 \
     --field model_predictions
   ```
-- [ ] Verify in FiftyOne App:
-  - [ ] `model_predictions` field appears in dataset schema
-  - [ ] 788 predictions matched to test set annotations
-  - [ ] Predictions visible as overlays alongside `ground_truth`
+- [x] Verify in FiftyOne App:
+  - [x] `model_predictions` field appears in dataset schema
+  - [x] 788 predictions matched to test set annotations
+  - [x] Predictions visible as overlays alongside `ground_truth`
 
 **How it works:**
+
 - CSV has `annotation_id` + `concept_name` (predicted species)
-- Script matches each prediction to a ground truth detection by `annotation_id`
+- Script filters to test split only (predictions are only for test images)
+- Matches each prediction to a ground truth detection by `annotation_id`
 - Creates a parallel `model_predictions` Detections field with same bounding boxes but model's labels
 - Enables visual comparison and `dataset.evaluate_detections()` for precision/recall/F1
 
 **Implementation Notes:**
+
 - Inference pipeline: `inference/` directory (run_inference.py + sbatch scripts)
 - Actual inference time: ~1.5 min on RTX 6000 (~3:48 total including setup)
 - Preprocessing artifacts stored in shared PACE storage for reproducibility
 
 ---
 
-## Phase 3: Model Evaluation
+## Phase 3: Model Evaluation 📋 NEXT UP
 
-**Goal**: Run zero-shot prediction and compare to ground truth to identify label errors.
+**Goal**: Evaluate competition model predictions against ground truth to compute metrics and identify label errors.
 
-**⚠️ Status Update**: Zero-shot prediction plugin (https://github.com/jacobmarks/zero-shot-prediction-plugin) has compatibility issues with current FiftyOne Enterprise platform. UI errors encountered during execution. This phase will be revisited with custom model evaluation workflow using MBARI's existing classifiers.
+**Prerequisites**: Phase 2A complete - `model_predictions` field populated on test samples in FiftyOne.
 
-### 3.1 Install Zero-Shot Prediction Plugin
+### 3.1 Compute Evaluation Metrics
 
-- [x] Attempted plugin installation
-- [x] Identified compatibility issues with platform
-- [ ] **DEFERRED**: Will use custom model predictions instead of zero-shot plugin
+- [ ] Run FiftyOne evaluation on test set:
+  ```python
+  import fiftyone as fo
+  dataset = fo.load_dataset("fathomnet-2025")
+  test_view = dataset.match_tags("test")
+  results = test_view.evaluate_detections(
+      "model_predictions",
+      gt_field="ground_truth",
+      eval_key="model_eval",
+  )
+  results.print_report()
+  ```
+- [ ] Metrics: precision, recall, F1 (per category and overall)
+- [ ] Generate confusion matrix
+- [ ] Identify top confused category pairs
 
-### 3.2 Run Zero-Shot Prediction
+### 3.2 Identify High-Confidence Disagreements
 
-- [ ] Configure plugin:
-  - [ ] Select model: CLIP or OWL-ViT
-  - [ ] Specify 79 FathomNet categories as classes
-  - [ ] Choose confidence threshold
+- [ ] Filter for samples where model prediction != ground truth label
+- [ ] Create saved view: "potential_label_errors"
+- [ ] Sort by most frequent disagreement patterns
 
-- [ ] Run predictions:
-  - [ ] Process full dataset (or subset for testing)
-  - [ ] Save predictions to new field: `zero_shot_predictions`
-  - [ ] Wait for completion (GPU job)
+### 3.3 Manual Review
 
-- [ ] Document configuration:
-  - [ ] Model used
-  - [ ] Class list provided
-  - [ ] Confidence threshold
-  - [ ] Compute time and cost
-
-### 3.3 Model Evaluation
-
-- [ ] Compute evaluation metrics:
-  - [ ] Use FiftyOne's evaluation module
-  - [ ] Compare `zero_shot_predictions` vs `ground_truth`
-  - [ ] Metrics: precision, recall, F1 (per category and overall)
-  - [ ] Generate confusion matrix
-
-- [ ] Identify high-confidence disagreements:
-  - [ ] Filter for samples where model != ground truth
-  - [ ] Sort by prediction confidence
-  - [ ] Create saved view: "potential_label_errors"
-
-- [ ] Manual review:
-  - [ ] Review top 50 disagreements
-  - [ ] Categorize: true errors, model mistakes, ambiguous cases
-  - [ ] Tag confirmed errors with `label_error` tag
+- [ ] Review top 50 disagreements in FiftyOne App
+- [ ] Categorize: true label errors, model mistakes, ambiguous cases
+- [ ] Tag confirmed errors with `label_error` tag
 
 ### 3.4 Document Evaluation Results
 
@@ -419,7 +428,6 @@ See [ONBOARDING.md](./ONBOARDING.md) for project overview and demo workflow.
   - [ ] Top 10 most confused categories
   - [ ] Examples of true label errors found
   - [ ] Examples of model mistakes
-  - [ ] Analysis of where zero-shot struggles
 
 ---
 
@@ -538,12 +546,13 @@ See [ONBOARDING.md](./ONBOARDING.md) for project overview and demo workflow.
 ```
 fathomnet_voxel51/
 ├── __init__.py                     ✅ exists
+├── setup_fiftyone_credentials.py   ✅ exists - Shared FiftyOne credential configuration
 ├── 00_check_gcp_auth.py            ✅ exists - GCP authentication verification
 ├── 01_upload_to_gcs.py             ✅ exists - Async image uploader (URLs → GCS)
 ├── 02_ingest_dataset.py            ✅ exists - FiftyOne dataset ingestion
 ├── 03_add_primary_label.py         ✅ exists - Label aggregation for visualization
-├── 04_import_predictions.py        📋 planned - Import model predictions CSV to FiftyOne
-├── 05_download_images_local.py     ✅ exists - Download images from URLs to local storage (PACE)
+├── 04_download_images_local.py     ✅ exists - Download images from URLs to local storage (PACE)
+├── 05_import_predictions.py        ✅ exists - Import model predictions CSV to FiftyOne
 └── debug_labels.py                 ✅ exists - Dataset debugging utility
 ```
 
@@ -647,6 +656,15 @@ python -m fathomnet_voxel51.ingest_dataset --dataset_name fathomnet-2025 --recre
 python fathomnet_voxel51/03_add_primary_label.py fathomnet-2025
 ```
 
+**Import model predictions**:
+
+```bash
+python -m fathomnet_voxel51.05_import_predictions \
+  inference/results/submission_experiment-final014.csv \
+  --dataset fathomnet-2025 \
+  --field model_predictions
+```
+
 **Debug dataset labels**:
 
 ```bash
@@ -667,21 +685,22 @@ pre-commit run --all-files
 | ------------------- | ----------------------- | ------------------------------- | ----------- |
 | Phase 0             | Repository Setup        | ~2-3 hours                      | ✅ Complete |
 | Phase 1             | Data Ingestion          | ~1.5 hours (mostly upload time) | ✅ Complete |
-| Phase 2             | Data Exploration        | ~4-6 hours + GPU queue          | In Progress |
-| Phase 3             | Model Evaluation        | ~4-6 hours + GPU queue          | Pending     |
+| Phase 2             | Data Exploration        | ~4-6 hours + GPU queue          | ✅ Complete |
+| Phase 2A            | Model Inference (PACE)  | ~6-8 hours + GPU queue          | ✅ Complete |
+| Phase 3             | Model Evaluation        | ~4-6 hours                      | Next Up     |
 | Phase 4             | Label Cleanup           | ~2-4 hours                      | Pending     |
 | Phase 5             | Model Training          | ~8-12 hours + GPU queue         | Future Work |
 | Phase 6             | Documentation & Cleanup | ~2-3 hours                      | Pending     |
-| **Total Remaining** |                         | ~16-26 hours + GPU queue        |             |
+| **Total Remaining** |                         | ~16-25 hours + GPU queue        |             |
 
 **Dependencies**:
 
 - FiftyOne Enterprise access (configured via `.env`)
 - GCP authentication (ADC or service account)
-- GPU compute for embeddings and model evaluation (Modal or internal)
+- GPU compute for model training (PACE cluster or Modal)
 
 **Priority Order** (workflow sequence):
 
-1. Label review (embeddings visualization, similarity search) - Phase 2
-2. Model evaluation (precision/recall/F1, confusion matrices) - Phase 3
+1. Model evaluation (precision/recall/F1, confusion matrices) - Phase 3
+2. Label cleanup (bulk editing, error correction) - Phase 4
 3. Model training (YOLO v8, custom models) - Phase 5

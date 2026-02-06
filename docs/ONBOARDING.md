@@ -85,27 +85,38 @@ Example queries:
 
 **Value:** Reduces label review from hours to minutes
 
-### 5. Model Evaluation (Future)
+### 5. Model Inference (PACE Cluster) ✅
+
+**Goal:** Run competition winner model on test set and import predictions into FiftyOne
+
+- Ran [FathomNet 2025 competition winner](https://github.com/dhlee-work/fathomnet-cvpr2025-ssl) on Georgia Tech PACE cluster (RTX 6000 GPU)
+- Downloaded 9,210 images + 16GB checkpoint to shared cluster storage
+- Inference pipeline in `inference/` directory with SLURM job scripts
+- **Result:** 788 predictions across 79 categories in ~1.5 min inference time
+- Predictions imported into FiftyOne as `model_predictions` field on test samples
+- Enables side-by-side comparison of `ground_truth` vs `model_predictions`
+
+**Value:** Enables model evaluation with `dataset.evaluate_detections()` for precision/recall/F1
+
+### 6. Model Evaluation (Next Up)
 
 **Goal:** Identify label errors using model predictions vs ground truth
 
 - Interactive confusion matrices
 - Precision/recall/F1 metrics per category
-- Scenario analysis (performance by collection, season, depth)
-- High-confidence disagreement detection
+- High-confidence disagreement detection (model vs ground truth)
+- Create saved views for potential label errors
 
-**Status:** Will use custom model predictions (zero-shot plugin has compatibility issues)
-
-### 6. Complete Pipeline (Roadmap)
+### 7. Complete Pipeline (Roadmap)
 
 ```
-Data Ingestion → Embeddings → Label Review → Model Training → Evaluation → Iteration
+Data Ingestion → Embeddings → Label Review → Model Inference → Evaluation → Iteration
 ```
 
-Future work: GPU compute integration, YOLO v8 trainer, model lineage/traceability
+Future work: YOLO v8 trainer, model lineage/traceability, hierarchical classification
 
 ---
 
 ## Technical Notes
 
-**Zero-Shot Prediction Plugin:** The community plugin ([jacobmarks/zero-shot-prediction-plugin](https://github.com/jacobmarks/zero-shot-prediction-plugin)) has compatibility issues with the current FiftyOne Enterprise platform. Model evaluation will use custom classifiers instead.
+**Model Inference:** The zero-shot prediction plugin ([jacobmarks/zero-shot-prediction-plugin](https://github.com/jacobmarks/zero-shot-prediction-plugin)) had compatibility issues with FiftyOne Enterprise. We replaced it with the actual competition winner model running on the PACE GPU cluster, which provides higher-quality predictions for evaluation.

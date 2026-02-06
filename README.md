@@ -18,7 +18,14 @@ This repo contains the workflow and analysis for the [FathomNet 2025 dataset](ht
 │   ├── 01_upload_to_gcs.py           # Stream images from FathomNet URLs to GCS
 │   ├── 02_ingest_dataset.py          # Ingest dataset into FiftyOne Enterprise
 │   ├── 03_add_primary_label.py       # Add aggregated labels for visualization
+│   ├── 04_download_images_local.py   # Download images to local storage (PACE cluster)
+│   ├── 05_import_predictions.py      # Import model predictions CSV into FiftyOne
 │   └── debug_labels.py               # Dataset label debugging utility
+├── inference/                         # Model inference pipeline (PACE cluster)
+│   ├── run_inference.py               # Main inference script (wraps competition code)
+│   ├── pyproject.toml                 # Inference dependencies (PyTorch, etc.)
+│   ├── results/                       # Model prediction outputs (CSV)
+│   └── sbatch/                        # SLURM job scripts for PACE cluster
 ├── notebooks/                        # Jupyter notebooks for exploration and analysis
 │   ├── 00_fathomnet-eda.ipynb        # Initial EDA and data exploration
 │   ├── 01_upload_to_gcs.ipynb        # Example notebook for uploading data to GCS
@@ -47,11 +54,11 @@ This repo contains the workflow and analysis for the [FathomNet 2025 dataset](ht
 
 1. **Cloud-Backed Ingestion:** Efficiently ingesting COCO datasets where images reside in Google Cloud Storage (GCS) without local duplication.
 
-2. **Embeddings & Visualization:** Using CLIP/ResNet to visualize the taxonomic distance between species.
+2. **Embeddings & Visualization:** Using CLIP + DINOv2 to visualize the taxonomic distance between species on 24,487 patches.
 
-3. **Similarity Search:** Text-to-Image search to distinguish between sub-species (e.g., Octopus rubescens vs. Octopus cyanea).
+3. **Similarity Search:** Text-to-Image and Image-to-Image search to distinguish between sub-species (e.g., Octopus rubescens vs. Octopus cyanea).
 
-4. **Zero-Shot Prediction:** Leveraging the [`@voxel51/zero-shot-prediction`](https://docs.voxel51.com/plugins/plugins_ecosystem/zero_shot_prediction.html) plugin to bootstrap labels for unknown objects (e.g., "plastic bag").
+4. **Model Inference & Evaluation:** Running the [FathomNet 2025 competition winner](https://github.com/dhlee-work/fathomnet-cvpr2025-ssl) on a GPU cluster (PACE) and importing 788 predictions into FiftyOne for evaluation against ground truth.
 
 ## Data Flow Architecture
 
@@ -73,10 +80,14 @@ FiftyOne Enterprise Dataset (fathomnet-2025)
 [03_add_primary_label.py - Label aggregation (optional)]
     ↓
 Analysis & Curation
-  - Embeddings Visualization
-  - Similarity Search
-  - Model Evaluation
-  - Zero-Shot Prediction
+  - Embeddings Visualization (CLIP + DINOv2)
+  - Similarity Search (Text-to-Image + Image-to-Image)
+  - Model Evaluation (competition winner predictions)
+
+Model Inference (PACE Cluster):
+  [04_download_images_local.py] → Local image storage
+  [inference/run_inference.py]  → GPU inference (RTX 6000)
+  [05_import_predictions.py]    → Import predictions to FiftyOne
 ```
 
 **Design Benefits:**
@@ -203,6 +214,20 @@ python -m fathomnet_voxel51.02_ingest_dataset --recreate
 ```
 
 > _Note: Running without `--recreate` on an existing dataset will skip ingestion. Use `--recreate` to delete and rebuild the dataset from scratch._
+
+### Step 3: Import Model Predictions (Optional)
+
+If you have model predictions from the inference pipeline (run on PACE cluster), import them into FiftyOne:
+
+```bash
+# Import competition model predictions to test set
+python -m fathomnet_voxel51.05_import_predictions \
+  inference/results/submission_experiment-final014.csv \
+  --dataset fathomnet-2025 \
+  --field model_predictions
+```
+
+> _The inference pipeline lives in `inference/` and runs on Georgia Tech's PACE cluster with GPU nodes. See `docs/model_inference_plan.md` for details._
 
 ### Exploration
 
