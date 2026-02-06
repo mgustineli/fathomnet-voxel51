@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fathomnet-inference"
+version = "0.1.0"
+description = "FathomNet 2025 competition model inference on PACE cluster"
+requires-python = ">=3.11"
+
+# NOTE: torch, torchvision, torchaudio are installed separately with CUDA
+# support in the SLURM job script (_job.sh). They are intentionally excluded
+# here to avoid pulling in CPU-only wheels.
+dependencies = [
+    # Competition model dependencies (from fathomnet-cvpr2025-ssl/requirements.txt)
+    "omegaconf==2.3.0",
+    "pytorch-lightning==2.5.1.post0",
+    "transformers==4.52.3",
+    "tokenizers==0.21.4",
+    "matplotlib==3.10.3",
+    "opencv-python==4.11.0.86",
+    "pandas==2.2.3",
+    "nibabel==5.3.2",
+    "scikit-learn==1.6.1",
+    "wandb==0.19.11",
+    # Additional dependencies discovered during setup
+    "fathomnet",
+    "torchmetrics",
+    "tqdm",
+    "Pillow",
+    "numpy",
+]
+
+[tool.setuptools]
+py-modules = ["run_inference"]
