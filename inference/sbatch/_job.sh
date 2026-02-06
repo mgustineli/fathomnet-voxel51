@@ -141,19 +141,37 @@ uv venv "$JOB_VENV" --python 3.11
 # Activate the virtual environment
 source "$JOB_VENV/bin/activate"
 
+# IMPORTANT: Export UV_LINK_MODE=copy globally. PACE cluster uses cross-filesystem
+# storage which causes hardlink failures. Without this, packages like tokenizers
+# install with empty directories and broken .so files.
+export UV_LINK_MODE=copy
+
 # Install inference dependencies from pyproject.toml
 echo "  Installing dependencies from pyproject.toml..."
-UV_LINK_MODE=copy uv pip install "$INFERENCE_DIR"
+uv pip install "$INFERENCE_DIR"
 
 # Install PyTorch with CUDA support (overrides CPU-only wheel from above)
 echo "  Installing PyTorch with CUDA..."
-UV_LINK_MODE=copy uv pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+uv pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+# Reinstall tokenizers from scratch (no cache) to avoid corrupted hardlink artifacts.
+# This is a known issue on PACE: the uv cache may contain broken wheels from
+# previous hardlink-mode installs, so --no-cache is required here.
+echo "  Reinstalling tokenizers (no-cache workaround)..."
+uv pip install --reinstall --no-cache tokenizers==0.21.4
 
 echo "  Virtual environment ready!"
 echo ""
 
-# Verify PyTorch CUDA
-python -c "import torch; print(f'  PyTorch: {torch.__version__}, CUDA: {torch.cuda.is_available()}, Device: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else \"N/A\"}')"
+# Verify critical imports before running inference
+python -c "
+import torch
+print(f'  PyTorch:    {torch.__version__}, CUDA: {torch.cuda.is_available()}, Device: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else \"N/A\"}')
+from tokenizers import Tokenizer
+print(f'  tokenizers: OK (v{__import__(\"tokenizers\").__version__})')
+import transformers
+print(f'  transformers: OK (v{transformers.__version__})')
+"
 echo ""
 
 # ============================================================================
