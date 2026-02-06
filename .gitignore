@@ -12,3 +12,6 @@ __pycache__/
 
 # Meeting notes
 meeting_notes/
+
+# Inference artifacts (SLURM logs)
+inference/logs/
